@@ -1,5 +1,5 @@
 package liquid
 
-type StaticTag struct {
+type StaticOutput struct {
 	Value []byte
 }

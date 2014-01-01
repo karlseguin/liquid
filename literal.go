@@ -1,6 +1,5 @@
 package liquid
 
-
 type Literal struct {
 	Value []byte
 }
@@ -12,4 +11,3 @@ func literalExtractor(data []byte) (Token, error) {
 	copy(l.Value, data)
 	return l, nil
 }
-

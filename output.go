@@ -1,13 +1,13 @@
 package liquid
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 )
 
-func tagExtractor(all []byte) (Token, error) {
+func outputExtractor(all []byte) (Token, error) {
 	//strip out leading and trailing {{ }}
-	data := all[2:len(all)-2]
+	data := all[2 : len(all)-2]
 	if start := skipSpaces(data); start == -1 {
 		return nil, nil
 	} else {
@@ -16,9 +16,9 @@ func tagExtractor(all []byte) (Token, error) {
 	var token Token
 	var err error
 	if data[0] == '\'' {
-		token, err = createStaticTag(data[1:], all)
+		token, err = createStaticOutput(data[1:], all)
 	} else {
-		token, err = createDynamicTag(data, all)
+		token, err = createDynamicOutput(data, all)
 	}
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func tagExtractor(all []byte) (Token, error) {
 	return token, nil
 }
 
-func createStaticTag(data, all []byte) (*StaticTag, error) {
+func createStaticOutput(data, all []byte) (*StaticOutput, error) {
 	escaped := 0
 	escaping := false
 	for index, b := range data {
@@ -37,11 +37,11 @@ func createStaticTag(data, all []byte) (*StaticTag, error) {
 			} else {
 				var value []byte
 				if escaped > 0 {
-					return &StaticTag{Value: unescape(data[0:index], escaped)}, nil
+					return &StaticOutput{Value: unescape(data[0:index], escaped)}, nil
 				}
 				value = make([]byte, index)
 				copy(value, data[:index])
-				return &StaticTag{Value: value}, nil
+				return &StaticOutput{Value: value}, nil
 			}
 		} else if b == '\\' && escaping == false {
 			escaping = true
@@ -49,21 +49,23 @@ func createStaticTag(data, all []byte) (*StaticTag, error) {
 			escaping = false
 		}
 	}
-	return nil, errors.New(fmt.Sprintf("Tag had an unclosed single quote in %q", all))
+	return nil, errors.New(fmt.Sprintf("Output had an unclosed single quote in %q", all))
 }
 
 func unescape(data []byte, escaped int) []byte {
-	value := make([]byte, len(data) - escaped)
+	value := make([]byte, len(data)-escaped)
 	i := 0
 	found := 0
 	position := 0
-	for l := len(data)-1; i < l; i++ {
+	for l := len(data) - 1; i < l; i++ {
 		b := data[i]
 		if b == '\\' && data[i+1] == '\'' {
 			value[position] = '\''
 			found++
 			i++
-			if found == escaped { break }
+			if found == escaped {
+				break
+			}
 		} else {
 			value[position] = b
 		}
@@ -73,7 +75,7 @@ func unescape(data []byte, escaped int) []byte {
 	return value
 }
 
-func createDynamicTag(data, all []byte) (*DynamicTag, error) {
+func createDynamicOutput(data, all []byte) (*DynamicOutput, error) {
 	start := 0
 	values := make([][]byte, 0, 1)
 	for index, b := range data {
@@ -86,7 +88,7 @@ func createDynamicTag(data, all []byte) (*DynamicTag, error) {
 			start = index + 1
 		}
 	}
-	return &DynamicTag{
+	return &DynamicOutput{
 		Values: trimArrayOfBytes(values),
 	}, nil
 }

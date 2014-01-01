@@ -60,7 +60,7 @@ func extractTokens(data []byte) ([]Token, error) {
 				start = i
 				isLiteral = false
 				if next == '{' {
-					extractor = tagExtractor
+					extractor = outputExtractor
 				} else {
 
 				}

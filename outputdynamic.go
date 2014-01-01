@@ -1,5 +1,5 @@
 package liquid
 
-type DynamicTag struct {
+type DynamicOutput struct {
 	Values [][]byte
 }
