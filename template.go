@@ -1,9 +1,11 @@
+// liquid template parser
 package liquid
 
 import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"crypto/sha1"
 )
 
 type TokenExtractor func(data []byte) (Token, error)
@@ -11,30 +13,53 @@ type TokenExtractor func(data []byte) (Token, error)
 type Token interface {
 }
 
+// A compiled liquid template
 type Template struct {
-	tokens []Token
+	Tokens []Token
 }
 
-func Parse(data []byte) (*Template, error) {
-	tokens, err := extractTokens(data)
-	if err != nil {
-		return nil, err
+// Parse the bytes into a Liquid template
+func Parse(data []byte, config *Configuration) (*Template, error) {
+	if config == nil {
+		config = defaultConfig
 	}
-	return &Template{
-		tokens: tokens,
-	}, nil
+	if config.cache == nil {
+		return buildTemplate(data)
+	}
+	hasher := sha1.New()
+	hasher.Write(data)
+	key := fmt.Sprintf("%x", hasher.Sum(nil))
+
+	template := config.cache.Get(key)
+	if template == nil {
+		var err error
+		template, err = buildTemplate(data)
+		if err != nil {
+			return nil, err
+		}
+		config.cache.Set(key, template)
+	}
+	return template, nil
 }
 
-func ParseString(data string) (*Template, error) {
-	return Parse([]byte(data))
+// Parse the string into a liquid template
+func ParseString(data string, config *Configuration) (*Template, error) {
+	return Parse([]byte(data), config)
 }
 
-func ParseFile(path string) (*Template, error) {
+// Turn the contents of the specified file into a liquid template
+func ParseFile(path string, config *Configuration) (*Template, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	return Parse(data)
+	return Parse(data, config)
+}
+
+func buildTemplate(data []byte) (*Template, error) {
+	tokens, err := extractTokens(data)
+	if err != nil { return nil, err }
+	return &Template{Tokens: tokens}, nil
 }
 
 func extractTokens(data []byte) ([]Token, error) {
