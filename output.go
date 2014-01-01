@@ -37,7 +37,6 @@ func outputExtractor(all []byte) (Token, error) {
 	return dynamic, nil
 }
 
-
 func extractFilters(data, all []byte) ([]filters.Filter, error) {
 	filters := make([]filters.Filter, 0, 0)
 	for i, l := 0, len(data); i < l; i++ {

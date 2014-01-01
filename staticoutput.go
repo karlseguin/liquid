@@ -1,9 +1,9 @@
 package liquid
 
 import (
-	"github.com/karlseguin/liquid/filters"
-	"fmt"
 	"errors"
+	"fmt"
+	"github.com/karlseguin/liquid/filters"
 )
 
 type StaticOutput struct {
@@ -21,7 +21,6 @@ func (o *StaticOutput) Render(data interface{}) []byte {
 	}
 	return value.([]byte)
 }
-
 
 func createStaticOutput(data, all []byte) (*StaticOutput, int, error) {
 	escaped := 0
