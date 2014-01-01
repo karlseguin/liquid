@@ -3,8 +3,8 @@ package liquid
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"github.com/karlseguin/liquid/filters"
+	"strings"
 )
 
 func outputExtractor(all []byte) (Token, error) {
@@ -21,13 +21,17 @@ func outputExtractor(all []byte) (Token, error) {
 			return nil, err
 		}
 		filters, err := extractFilters(data[position+2:], all)
-		if err != nil { return nil, err}
+		if err != nil {
+			return nil, err
+		}
 		static.Filters = filters
 		return static, nil
 	}
 	dynamic, position := createOutputDynamic(data, all)
 	filters, err := extractFilters(data[position:], all)
-	if err != nil { return nil, err}
+	if err != nil {
+		return nil, err
+	}
 	dynamic.Filters = filters
 	return dynamic, nil
 }
@@ -84,20 +88,20 @@ func unescape(data []byte, escaped int) []byte {
 func createOutputDynamic(data, all []byte) (*OutputDynamic, int) {
 	i := 0
 	start := 0
-	values := make([][]byte, 0, 1)
+	fields := make([]string, 0, 1)
 	for l := len(data); i < l; i++ {
 		b := data[i]
 		if b == ' ' {
-			values = append(values, data[start:i])
+			fields = append(fields, strings.ToLower(string(data[start:i])))
 			break
 		}
 		if b == '.' {
-			values = append(values, data[start:i])
+			fields = append(fields, strings.ToLower(string(data[start:i])))
 			start = i + 1
 		}
 	}
 	return &OutputDynamic{
-		Values: trimArrayOfBytes(values),
+		Fields: trimArrayOfStrings(fields),
 	}, i
 }
 
@@ -105,10 +109,14 @@ func extractFilters(data, all []byte) ([]filters.Filter, error) {
 	filters := make([]filters.Filter, 0, 0)
 	for i, l := 0, len(data); i < l; i++ {
 		b := data[i]
-		if b == ' ' { continue }
+		if b == ' ' {
+			continue
+		}
 		if b == '|' {
 			filter, end, err := extracFilter(data[i+1:], all)
-			if err != nil { return nil, err}
+			if err != nil {
+				return nil, err
+			}
 			filters = append(filters, filter)
 			i += end
 		} else {
@@ -125,7 +133,7 @@ func extracFilter(data, all []byte) (filters.Filter, int, error) {
 	}
 	i := start
 	l := len(data)
-	for ;i < l; i++ {
+	for ; i < l; i++ {
 		b := data[i]
 		if b == ' ' || b == ':' {
 			break
@@ -138,21 +146,24 @@ func extracFilter(data, all []byte) (filters.Filter, int, error) {
 	}
 
 	var parameters []string
-	for ;i < l; i++ {
+	for ; i < l; i++ {
 		b := data[i]
-		if b == '|' { break }
+		if b == '|' {
+			break
+		}
 		if b == ':' {
 			p, position, err := extractParameters(data[i+1:], all)
-			if err != nil { return nil, 0, err}
+			if err != nil {
+				return nil, 0, err
+			}
 			i += position
 			parameters = p
-			break;
+			break
 		}
 	}
 
 	return filterFactory(parameters), i, nil
 }
-
 
 func extractParameters(data, all []byte) ([]string, int, error) {
 	i := 0
@@ -186,14 +197,14 @@ func extractParameters(data, all []byte) ([]string, int, error) {
 				//todo unescape
 				parameters = append(parameters, string(data[start:j]))
 				start = 0
-				i = j+1
+				i = j + 1
 				break
 			}
 		}
 		if quoted == true && (data[i-1] != '\'' || start > 0) {
 			return nil, 0, errors.New(fmt.Sprintf("Missing closing quote for parameter in %q", all))
 		}
-		if i == l - 1 && start > 0 {
+		if i == l-1 && start > 0 {
 			parameters = append(parameters, string(data[start:l]))
 			i = l
 		}

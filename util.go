@@ -12,11 +12,11 @@ func skipSpaces(data []byte) int {
 
 // Since these templates are possibly long-lived, let's free up any space
 // which was accumulated while we grew these arrays
-func trimArrayOfBytes(values [][]byte) [][]byte {
+func trimArrayOfStrings(values []string) []string {
 	if len(values) == cap(values) {
 		return values
 	}
-	trimmed := make([][]byte, len(values))
+	trimmed := make([]string, len(values))
 	for index, value := range values {
 		trimmed[index] = value
 	}

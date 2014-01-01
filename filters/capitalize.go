@@ -6,6 +6,6 @@ func CapitalizeFactory(parameters []string) Filter {
 }
 
 // Capitalizes words in the input sentence
-func Capitalize(input interface{}) string {
-	return ""
+func Capitalize(input interface{}) interface{} {
+	return nil
 }

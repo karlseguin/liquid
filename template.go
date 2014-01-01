@@ -2,15 +2,17 @@
 package liquid
 
 import (
+	"bytes"
+	"crypto/sha1"
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"crypto/sha1"
 )
 
 type TokenExtractor func(data []byte) (Token, error)
 
 type Token interface {
+	Render(data interface{}) []byte
 }
 
 // A compiled liquid template
@@ -56,9 +58,19 @@ func ParseFile(path string, config *Configuration) (*Template, error) {
 	return Parse(data, config)
 }
 
+func (t *Template) Render(data interface{}) []byte {
+	buffer := new(bytes.Buffer)
+	for _, token := range t.Tokens {
+		buffer.Write(token.Render(data))
+	}
+	return buffer.Bytes()
+}
+
 func buildTemplate(data []byte) (*Template, error) {
 	tokens, err := extractTokens(data)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	return &Template{Tokens: tokens}, nil
 }
 

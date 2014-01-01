@@ -106,17 +106,17 @@ func TestOutputStaticWithMultipleFiltersHavingParameters(t *testing.T) {
 
 func assertDynamic(spec *gspec.S, output Token, expected ...string) {
 	d := output.(*OutputDynamic)
-	spec.Expect(len(d.Values)).ToEqual(len(expected))
+	spec.Expect(len(d.Fields)).ToEqual(len(expected))
 	for index, e := range expected {
-		spec.Expect(string(d.Values[index])).ToEqual(e)
+		spec.Expect(string(d.Fields[index])).ToEqual(e)
 	}
 }
 
-func assertFilters(t *testing.T, filters []filters.Filter, expected ...string){
+func assertFilters(t *testing.T, filters []filters.Filter, expected ...string) {
 	spec := gspec.New(t)
 	spec.Expect(len(filters)).ToEqual(len(expected))
 	for index, filter := range filters {
-		actual := filter(strconv.Itoa(index))
+		actual := string(filter(strconv.Itoa(index)).([]byte))
 		spec.Expect(actual).ToEqual(expected[index])
 	}
 }

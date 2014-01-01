@@ -11,3 +11,7 @@ func literalExtractor(data []byte) (Token, error) {
 	copy(l.Value, data)
 	return l, nil
 }
+
+func (l *Literal) Render(data interface{}) []byte {
+	return l.Value
+}

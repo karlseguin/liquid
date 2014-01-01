@@ -13,9 +13,9 @@ type DebugFilter struct {
 	parameters []string
 }
 
-func (f *DebugFilter) Debug(input interface{}) string {
+func (f *DebugFilter) Debug(input interface{}) interface{} {
 	if len(f.parameters) == 0 {
-		return "debug(" + input.(string) + ")"
+		return []byte("debug(" + input.(string) + ")")
 	}
-	return "debug(" + input.(string) + ", " + strings.Join(f.parameters, ", ") + ")"
+	return []byte("debug(" + input.(string) + ", " + strings.Join(f.parameters, ", ") + ")")
 }

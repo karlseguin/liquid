@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"bytes"
 	"strings"
 )
 
@@ -10,6 +11,13 @@ func DowncaseFactory(parameters []string) Filter {
 }
 
 // convert an input string to lowercase
-func Downcase(input interface{}) string {
-  return strings.ToLower(input.(string))
+func Downcase(input interface{}) interface{} {
+	switch typed := input.(type) {
+	case []byte:
+		return bytes.ToUpper(typed)
+	case string:
+		return strings.ToUpper(typed)
+	default:
+		return input
+	}
 }

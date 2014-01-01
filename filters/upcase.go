@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"bytes"
 	"strings"
 )
 
@@ -10,6 +11,13 @@ func UpcaseFactory(parameters []string) Filter {
 }
 
 // convert an input string to uppercase
-func Upcase(input interface{}) string {
-  return strings.ToUpper(input.(string))
+func Upcase(input interface{}) interface{} {
+	switch typed := input.(type) {
+	case []byte:
+		return bytes.ToUpper(typed)
+	case string:
+		return strings.ToUpper(typed)
+	default:
+		return input
+	}
 }

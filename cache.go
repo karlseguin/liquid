@@ -1,6 +1,6 @@
 package liquid
 
-import(
+import (
 	"sync"
 )
 
@@ -9,6 +9,7 @@ type Cache interface {
 	Set(key string, template *Template)
 	Clear()
 }
+
 var TemplateCache = &SimpleCache{lookup: make(map[string]*Template)}
 
 type SimpleCache struct {

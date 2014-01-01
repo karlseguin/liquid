@@ -13,6 +13,6 @@ type JoinFilter struct {
 }
 
 // join elements of the array with certain character between them
-func (f *JoinFilter) Join(input interface{}) string {
-  return ""
+func (f *JoinFilter) Join(input interface{}) interface{} {
+  return nil
 }
