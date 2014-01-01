@@ -17,7 +17,7 @@ func outputExtractor(all []byte) (Token, error) {
 		data = data[start:]
 	}
 	if data[0] == '\'' {
-		static, position, err := createOutputStatic(data[1:], all)
+		static, position, err := createStaticOutput(data[1:], all)
 		if err != nil {
 			return nil, err
 		}
@@ -28,7 +28,7 @@ func outputExtractor(all []byte) (Token, error) {
 		static.Filters = filters
 		return static, nil
 	}
-	dynamic, position := createOutputDynamic(data, all)
+	dynamic, position := createDynamicOutput(data, all)
 	filters, err := extractFilters(data[position:], all)
 	if err != nil {
 		return nil, err
@@ -37,74 +37,6 @@ func outputExtractor(all []byte) (Token, error) {
 	return dynamic, nil
 }
 
-func createOutputStatic(data, all []byte) (*OutputStatic, int, error) {
-	escaped := 0
-	escaping := false
-	for index, b := range data {
-		if b == '\'' {
-			if escaping {
-				escaped++
-				escaping = false
-			} else {
-				var value []byte
-				if escaped > 0 {
-					return &OutputStatic{Value: unescape(data[0:index], escaped)}, index, nil
-				}
-				value = make([]byte, index)
-				copy(value, data[:index])
-				return &OutputStatic{Value: value}, index, nil
-			}
-		} else if b == '\\' && escaping == false {
-			escaping = true
-		} else {
-			escaping = false
-		}
-	}
-	return nil, 0, errors.New(fmt.Sprintf("Output had an unclosed single quote in %q", all))
-}
-
-func unescape(data []byte, escaped int) []byte {
-	value := make([]byte, len(data)-escaped)
-	i := 0
-	found := 0
-	position := 0
-	for l := len(data) - 1; i < l; i++ {
-		b := data[i]
-		if b == '\\' && data[i+1] == '\'' {
-			value[position] = '\''
-			found++
-			i++
-			if found == escaped {
-				break
-			}
-		} else {
-			value[position] = b
-		}
-		position++
-	}
-	copy(value[position:], data[i:])
-	return value
-}
-
-func createOutputDynamic(data, all []byte) (*OutputDynamic, int) {
-	i := 0
-	start := 0
-	fields := make([]string, 0, 1)
-	for l := len(data); i < l; i++ {
-		b := data[i]
-		if b == ' ' {
-			fields = append(fields, strings.ToLower(string(data[start:i])))
-			break
-		}
-		if b == '.' {
-			fields = append(fields, strings.ToLower(string(data[start:i])))
-			start = i + 1
-		}
-	}
-	return &OutputDynamic{
-		Fields: helpers.TrimArrayOfStrings(fields),
-	}, i
-}
 
 func extractFilters(data, all []byte) ([]filters.Filter, error) {
 	filters := make([]filters.Filter, 0, 0)

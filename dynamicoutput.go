@@ -13,12 +13,12 @@ var (
 	typeLock  sync.RWMutex
 )
 
-type OutputDynamic struct {
+type DynamicOutput struct {
 	Fields  []string
 	Filters []filters.Filter
 }
 
-func (o *OutputDynamic) Render(data interface{}) []byte {
+func (o *DynamicOutput) Render(data interface{}) []byte {
 	for _, field := range o.Fields {
 		if data = resolve(data, field); data == nil {
 			return []byte("{{" + strings.Join(o.Fields, ".") + "}}")
@@ -32,6 +32,26 @@ func (o *OutputDynamic) Render(data interface{}) []byte {
 		}
 	}
 	return helpers.DataToBytes(value)
+}
+
+func createDynamicOutput(data, all []byte) (*DynamicOutput, int) {
+	i := 0
+	start := 0
+	fields := make([]string, 0, 1)
+	for l := len(data); i < l; i++ {
+		b := data[i]
+		if b == ' ' {
+			fields = append(fields, strings.ToLower(string(data[start:i])))
+			break
+		}
+		if b == '.' {
+			fields = append(fields, strings.ToLower(string(data[start:i])))
+			start = i + 1
+		}
+	}
+	return &DynamicOutput{
+		Fields: helpers.TrimArrayOfStrings(fields),
+	}, i
 }
 
 func resolve(data interface{}, field string) interface{} {
