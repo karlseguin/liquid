@@ -9,6 +9,50 @@
 
 Given a file path, liquid can also `ParseFile`. Give a `[]byte` it can also simply `Parse`.
 
+## What's Missing
+The following filters are missing:
+
+- date
+- sort
+- map
+- size
+- escape
+- escape_once
+- strip_html
+- strip_newlines
+- newline_to_br
+- replace
+- replace_first
+- remove
+- remove_first
+- truncate
+- truncatewords
+- prepend
+- append
+- minus
+- times
+- divided_by
+- split
+- modulo
+
+The following tags are missing:
+
+- assign
+- capture
+- case
+- comment
+- cycle
+- for
+- if
+- include
+- raw
+- unless
+
+Other:
+
+- Support for 'now'
+- Render can generate far less temporary objects
+
 ## Template Cache
 By default the templates are cached in a pretty dumb cache based. That is, once in the cache, items stay in the cache (there's no expiry). The cache can be disabled, on a per-template basis, via:
 
