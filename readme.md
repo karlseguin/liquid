@@ -28,8 +28,6 @@ The following filters are missing:
 - truncatewords
 - prepend
 - append
-- times
-- divided_by
 - split
 - modulo
 

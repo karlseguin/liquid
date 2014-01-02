@@ -20,4 +20,5 @@ var Filters = map[string]FilterFactory{
 	"plus":       filters.PlusFactory,
 	"minus":      filters.MinusFactory,
 	"size":       filters.SizeFactory,
+	"times":      filters.TimesFactory,
 }
