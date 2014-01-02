@@ -18,7 +18,7 @@ func (o *DynamicOutput) Render(data interface{}) []byte {
 		}
 	}
 
-	value := data
+	value := helpers.ResolveFinal(data)
 	if o.Filters != nil {
 		for _, filter := range o.Filters {
 			value = filter(value)

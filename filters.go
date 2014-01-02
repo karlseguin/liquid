@@ -17,4 +17,5 @@ var Filters = map[string]FilterFactory{
 	"last":       filters.LastFactory,
 	"join":       filters.JoinFactory,
 	"debug":      filters.DebugFactory,
+	"plus":       filters.PlusFactory,
 }
