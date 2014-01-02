@@ -58,7 +58,7 @@ func ParseFile(path string, config *Configuration) (*Template, error) {
 	return Parse(data, config)
 }
 
-func (t *Template) Render(data interface{}) []byte {
+func (t *Template) Render(data map[string]interface{}) []byte {
 	buffer := new(bytes.Buffer)
 	for _, token := range t.Tokens {
 		buffer.Write(token.Render(data))
