@@ -6,6 +6,7 @@ import (
 
 var (
 	EndComment = &EndTag{"endcomment"}
+	EndRaw = &EndTag{"endraw"}
 )
 
 type EndTag struct {

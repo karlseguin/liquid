@@ -2,6 +2,7 @@ package liquid
 
 import (
 	"errors"
+	"strings"
 	"fmt"
 	"github.com/karlseguin/liquid/core"
 	"github.com/karlseguin/liquid/tags"
@@ -12,10 +13,12 @@ type TagFactory func(data []byte) (core.Token, error)
 
 var TagEnds = map[string]core.Tag {
 	"endcomment": tags.EndComment,
+	"endraw": tags.EndRaw,
 }
 
 var Tags = map[string]TagFactory{
 	"comment": tags.CommentFactory,
+	"raw": tags.RawFactory,
 }
 
 func tagExtractor(all []byte) (core.Token, error) {
@@ -28,9 +31,9 @@ func tagExtractor(all []byte) (core.Token, error) {
 	l := len(data)
 	i := start
 	for ;i < l; i++ {
-		if data[i] == ' ' { break }
+		if data[i] == ' ' || data[i] == '%' { break }
 	}
-	tagName := string(data[start:i])
+	tagName := strings.ToLower(string(data[start:i]))
 	if end, exists := TagEnds[tagName]; exists {
 		return end, nil
 	}

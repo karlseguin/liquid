@@ -6,6 +6,7 @@ import (
 	"crypto/sha1"
 	"errors"
 	"fmt"
+	"strings"
 	"github.com/karlseguin/liquid/core"
 	"io/ioutil"
 )
@@ -126,10 +127,18 @@ func extractTokens(data []byte, container core.Container) error {
 				extractor = nil
 				if token != nil {
 					tag := token.(core.Tag)
-					if closed, related := container.AddTag(tag); closed {
+					name := tag.Name()
+					if name == "raw" {
+						length, literal := extractRaw(data[i+1:])
+						if literal == nil {
+							return errors.New("unclosed {% raw %} tag")
+						}
+						container.AddToken(literal)
+						i+= length
+					} else if closed, related := container.AddTag(tag); closed {
 						stack, container = popContainerStack(stack)
 					} else if tag.IsEnd() {
-						return errors.New(fmt.Sprintf("Was not expecting a the closing tag %q", tag.Name()))
+						return errors.New(fmt.Sprintf("Was not expecting a the closing tag %q", name))
 					} else if related == false {
 						stack = append(stack, container)
 						container = tag
@@ -142,10 +151,37 @@ func extractTokens(data []byte, container core.Container) error {
 			start = i
 		}
 	}
-	if err := doExtraction(extractor, data[start:len(data)], container); err != nil {
-		return err
+	if extractor != nil {
+		if err := doExtraction(extractor, data[start:len(data)], container); err != nil {
+			return err
+		}
 	}
 	return nil
+}
+
+func extractRaw(data []byte) (int, core.Token) {
+	l := len(data) - 2
+	for i := 0; i < l; i++ {
+		if data[i] == '{' && data[i+1] == '%' {
+			start := core.SkipSpaces(data[i+2:])
+			if start == -1 {
+				return 0, nil
+			}
+			start += i + 2
+			for j := start ; j < l; j++ {
+				if data[j] == ' ' || data[j] == '%' {
+					if strings.ToLower(string(data[start:j])) == "endraw" {
+						token, _ := literalExtractor(data[:i])
+						for ; j < l; j++ {
+							if data[j] == '}' { break }
+						}
+						return j+1, token
+					}
+				}
+			}
+		}
+	}
+	return 0, nil
 }
 
 func doExtraction(extractor TokenExtractor, data []byte, container core.Container) error {
