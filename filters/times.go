@@ -48,6 +48,9 @@ func stringTimesInt(s string, times int) interface{} {
 	if i, err := strconv.Atoi(s); err == nil {
 		return i * times
 	}
+	if f, err := strconv.ParseFloat(s, 64); err == nil {
+		return f * float64(times)
+	}
 	return s
 }
 
@@ -78,11 +81,11 @@ func (t *FloatTimesFilter) Times(input interface{}) interface{} {
 }
 
 func stringTimesFloat(s string, times float64) interface{} {
-	if f, err := strconv.ParseFloat(s, 64); err == nil {
-		return f * times
-	}
 	if i, err := strconv.Atoi(s); err == nil {
 		return float64(i) * times
+	}
+	if f, err := strconv.ParseFloat(s, 64); err == nil {
+		return f * times
 	}
 	return s
 }

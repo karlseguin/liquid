@@ -12,6 +12,12 @@ func TestMinusAnIntToAnInt(t *testing.T) {
 	spec.Expect(filter(43).(int)).ToEqual(38)
 }
 
+func TestMinusAFloatToAnInt(t *testing.T) {
+	spec := gspec.New(t)
+	filter := MinusFactory([]string{"5.23"})
+	spec.Expect(filter(43).(float64)).ToEqual(37.769999999999996)
+}
+
 func TestMinusAnIntToAFloat(t *testing.T) {
 	spec := gspec.New(t)
 	filter := MinusFactory([]string{"5"})
@@ -29,6 +35,12 @@ func TestMinusAnIntToAStringAsAnInt(t *testing.T) {
 	spec := gspec.New(t)
 	filter := MinusFactory([]string{"7"})
 	spec.Expect(filter("33").(int)).ToEqual(26)
+}
+
+func TestMinusAFloatToAStringAsAFloat(t *testing.T) {
+	spec := gspec.New(t)
+	filter := MinusFactory([]string{"7.77"})
+	spec.Expect(filter("123.2").(float64)).ToEqual(115.43)
 }
 
 func TestMinusAnIntToBytesAsAnInt(t *testing.T) {

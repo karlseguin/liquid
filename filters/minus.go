@@ -14,5 +14,8 @@ func MinusFactory(parameters []string) Filter {
 	if i, err := strconv.Atoi(parameters[0]); err == nil {
 		return (&IntPlusFilter{-i, ""}).Plus
 	}
+	if f, err := strconv.ParseFloat(parameters[0], 64); err == nil {
+		return (&FloatPlusFilter{-f, parameters[0]}).Plus
+	}
 	return defaultMinus.Plus
 }
