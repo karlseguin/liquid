@@ -3,6 +3,7 @@ package liquid
 import (
 	"github.com/karlseguin/gspec"
 	"github.com/karlseguin/liquid/filters"
+	"github.com/karlseguin/liquid/core"
 	"strconv"
 	"testing"
 )
@@ -105,7 +106,7 @@ func TestOutputWithAnEscapeParameter(t *testing.T) {
 	assertFilters(t, output.(*StaticOutput).Filters, "debug(0, te'st)")
 }
 
-func assertDynamic(spec *gspec.S, output Token, expected ...string) {
+func assertDynamic(spec *gspec.S, output core.Token, expected ...string) {
 	d := output.(*DynamicOutput)
 	spec.Expect(len(d.Fields)).ToEqual(len(expected))
 	for index, e := range expected {

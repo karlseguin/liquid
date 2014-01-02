@@ -1,7 +1,7 @@
 package filters
 
 import (
-	"github.com/karlseguin/liquid/helpers"
+	"github.com/karlseguin/liquid/core"
 )
 
 // Creates an append filter
@@ -21,6 +21,6 @@ func (a *AppendFilter) Append(input interface{}) interface{} {
 	case string:
 		return typed + a.value
 	default:
-		return string(helpers.ToBytes(input)) + a.value
+		return string(core.ToBytes(input)) + a.value
 	}
 }

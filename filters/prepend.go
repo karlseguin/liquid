@@ -1,7 +1,7 @@
 package filters
 
 import (
-	"github.com/karlseguin/liquid/helpers"
+	"github.com/karlseguin/liquid/core"
 )
 
 // Creates an prepend filter
@@ -21,6 +21,6 @@ func (a *PrependFilter) Prepend(input interface{}) interface{} {
 	case string:
 		return a.value + typed
 	default:
-		return a.value + string(helpers.ToBytes(input))
+		return a.value + string(core.ToBytes(input))
 	}
 }

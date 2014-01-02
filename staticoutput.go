@@ -11,7 +11,7 @@ type StaticOutput struct {
 	Filters []filters.Filter
 }
 
-func (o *StaticOutput) Render(data interface{}) []byte {
+func (o *StaticOutput) Render(data map[string]interface{}) []byte {
 	if o.Filters == nil {
 		return o.Value
 	}

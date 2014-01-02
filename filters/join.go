@@ -2,7 +2,7 @@ package filters
 
 import (
 	"bytes"
-	"github.com/karlseguin/liquid/helpers"
+	"github.com/karlseguin/liquid/core"
 	"reflect"
 )
 
@@ -34,7 +34,7 @@ func (f *JoinFilter) Join(input interface{}) interface{} {
 
 	array := make([][]byte, l)
 	for i := 0; i < l; i++ {
-		array[i] = helpers.ToBytes(value.Index(i).Interface())
+		array[i] = core.ToBytes(value.Index(i).Interface())
 	}
 
 	return bytes.Join(array, f.glue)

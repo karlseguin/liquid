@@ -1,8 +1,8 @@
 package liquid
 
 import (
+	"github.com/karlseguin/liquid/core"
 	"github.com/karlseguin/liquid/filters"
-	"github.com/karlseguin/liquid/helpers"
 	"strings"
 )
 
@@ -11,20 +11,21 @@ type DynamicOutput struct {
 	Filters []filters.Filter
 }
 
-func (o *DynamicOutput) Render(data interface{}) []byte {
+func (o *DynamicOutput) Render(data map[string]interface{}) []byte {
+	var d interface{} = data
 	for _, field := range o.Fields {
-		if data = helpers.Resolve(data, field); data == nil {
+		if d = core.Resolve(d, field); data == nil {
 			return []byte("{{" + strings.Join(o.Fields, ".") + "}}")
 		}
 	}
 
-	value := helpers.ResolveFinal(data)
+	value := core.ResolveFinal(d)
 	if o.Filters != nil {
 		for _, filter := range o.Filters {
 			value = filter(value)
 		}
 	}
-	return helpers.ToBytes(value)
+	return core.ToBytes(value)
 }
 
 func createDynamicOutput(data, all []byte) (*DynamicOutput, int) {
@@ -43,6 +44,6 @@ func createDynamicOutput(data, all []byte) (*DynamicOutput, int) {
 		}
 	}
 	return &DynamicOutput{
-		Fields: helpers.TrimStrings(fields),
+		Fields: core.TrimStrings(fields),
 	}, i
 }

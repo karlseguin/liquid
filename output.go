@@ -3,15 +3,15 @@ package liquid
 import (
 	"errors"
 	"fmt"
+	"github.com/karlseguin/liquid/core"
 	"github.com/karlseguin/liquid/filters"
-	"github.com/karlseguin/liquid/helpers"
 	"strings"
 )
 
-func outputExtractor(all []byte) (Token, error) {
+func outputExtractor(all []byte) (core.Token, error) {
 	//strip out leading and trailing {{ }}
 	data := all[2 : len(all)-2]
-	if start := helpers.SkipSpaces(data); start == -1 {
+	if start := core.SkipSpaces(data); start == -1 {
 		return nil, nil
 	} else {
 		data = data[start:]
@@ -59,7 +59,7 @@ func extractFilters(data, all []byte) ([]filters.Filter, error) {
 }
 
 func extracFilter(data, all []byte) (filters.Filter, int, error) {
-	start := helpers.SkipSpaces(data)
+	start := core.SkipSpaces(data)
 	if start == -1 {
 		return nil, 0, errors.New(fmt.Sprintf("Empty filter in %q", all))
 	}

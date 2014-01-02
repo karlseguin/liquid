@@ -1,10 +1,14 @@
 package liquid
 
+import (
+	"github.com/karlseguin/liquid/core"
+)
+
 type Literal struct {
 	Value []byte
 }
 
-func literalExtractor(data []byte) (Token, error) {
+func literalExtractor(data []byte) (core.Token, error) {
 	l := &Literal{
 		Value: make([]byte, len(data)),
 	}
@@ -12,6 +16,6 @@ func literalExtractor(data []byte) (Token, error) {
 	return l, nil
 }
 
-func (l *Literal) Render(data interface{}) []byte {
+func (l *Literal) Render(data map[string]interface{}) []byte {
 	return l.Value
 }

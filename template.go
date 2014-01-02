@@ -6,18 +6,28 @@ import (
 	"crypto/sha1"
 	"errors"
 	"fmt"
+	"github.com/karlseguin/liquid/core"
 	"io/ioutil"
 )
 
-type TokenExtractor func(data []byte) (Token, error)
-
-type Token interface {
-	Render(data interface{}) []byte
-}
+type TokenExtractor func(data []byte) (core.Token, error)
 
 // A compiled liquid template
 type Template struct {
-	Tokens []Token
+	Tokens []core.Token
+}
+
+func (t *Template) AddToken(token core.Token) {
+	t.Tokens = append(t.Tokens, token)
+}
+
+func (t *Template) AddTag(tag core.Tag) (bool, bool) {
+	t.AddToken(tag)
+	return false, false
+}
+
+func (t *Template) Name() string {
+	return "root"
 }
 
 // Parse the bytes into a Liquid template
@@ -67,19 +77,18 @@ func (t *Template) Render(data map[string]interface{}) []byte {
 }
 
 func buildTemplate(data []byte) (*Template, error) {
-	tokens, err := extractTokens(data)
-	if err != nil {
+	template := new(Template)
+	if err := extractTokens(data, template); err != nil {
 		return nil, err
 	}
-	return &Template{Tokens: tokens}, nil
+	return template, nil
 }
 
-func extractTokens(data []byte) ([]Token, error) {
+func extractTokens(data []byte, container core.Container) error {
 	start := 0
 	isLiteral := false
-	var err error
 	var extractor TokenExtractor
-	tokens := make([]Token, 0, 5)
+	stack := make([]core.Container, 0, 0)
 
 	for i, l := 0, len(data)-1; i < l; i++ {
 		current := data[i]
@@ -88,10 +97,10 @@ func extractTokens(data []byte) ([]Token, error) {
 			if next == '{' || next == '%' {
 				if extractor != nil {
 					if isLiteral == false {
-						return nil, errors.New(fmt.Sprintf("Invalid escape sequence %q", data[start:i]))
+						return errors.New(fmt.Sprintf("Invalid escape sequence %q", data[start:i]))
 					}
-					if tokens, err = doExtraction(extractor, data[start:i], tokens); err != nil {
-						return nil, err
+					if err := doExtraction(extractor, data[start:i], container); err != nil {
+						return err
 					}
 				}
 				start = i
@@ -99,16 +108,33 @@ func extractTokens(data []byte) ([]Token, error) {
 				if next == '{' {
 					extractor = outputExtractor
 				} else {
-
+					extractor = tagExtractor
 				}
 			}
 		} else if current == '}' && i > 0 {
 			prev := data[i-1]
-			if prev == '}' || prev == '%' {
-				if tokens, err = doExtraction(extractor, data[start:i], tokens); err != nil {
-					return nil, err
+			if prev == '}' {
+				if err := doExtraction(extractor, data[start:i], container); err != nil {
+					return err
 				}
 				extractor = nil
+			} else if prev == '%' {
+				token, err := extractor(data[start:i])
+				if err != nil {
+					return err
+				}
+				extractor = nil
+				if token != nil {
+					tag := token.(core.Tag)
+					if closed, related := container.AddTag(tag); closed {
+						stack, container = popContainerStack(stack)
+					} else if tag.IsEnd() {
+						return errors.New(fmt.Sprintf("Was not expecting a the closing tag %q", tag.Name()))
+					} else if related == false {
+						stack = append(stack, container)
+						container = tag
+					}
+				}
 			}
 		} else if extractor == nil {
 			extractor = literalExtractor
@@ -116,16 +142,22 @@ func extractTokens(data []byte) ([]Token, error) {
 			start = i
 		}
 	}
-	if tokens, err = doExtraction(extractor, data[start:len(data)], tokens); err != nil {
-		return nil, err
+	if err := doExtraction(extractor, data[start:len(data)], container); err != nil {
+		return err
 	}
-	return tokens, nil
+	return nil
 }
 
-func doExtraction(extractor TokenExtractor, data []byte, tokens []Token) ([]Token, error) {
+func doExtraction(extractor TokenExtractor, data []byte, container core.Container) error {
 	token, err := extractor(data)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return append(tokens, token), nil
+	container.AddToken(token)
+	return nil
+}
+
+func popContainerStack(stack []core.Container) ([]core.Container, core.Container) {
+	l := len(stack) - 1
+	return stack[0:l], stack[l]
 }

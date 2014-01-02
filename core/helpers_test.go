@@ -1,4 +1,4 @@
-package helpers
+package core
 
 import (
 	"github.com/karlseguin/gspec"
