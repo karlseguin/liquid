@@ -2,8 +2,8 @@ package filters
 
 import (
 	"github.com/karlseguin/gspec"
-	"time"
 	"testing"
+	"time"
 )
 
 func TestPlusAnIntToAnInt(t *testing.T) {

@@ -29,7 +29,6 @@ The following filters are missing:
 - truncatewords
 - prepend
 - append
-- minus
 - times
 - divided_by
 - split

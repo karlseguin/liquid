@@ -18,4 +18,5 @@ var Filters = map[string]FilterFactory{
 	"join":       filters.JoinFactory,
 	"debug":      filters.DebugFactory,
 	"plus":       filters.PlusFactory,
+	"minus":      filters.MinusFactory,
 }
