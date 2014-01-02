@@ -27,7 +27,7 @@ func capitalize(sentence []byte) []byte {
 	l1 := l - 1
 	for i := 0; i < l1; i++ {
 		if sentence[i] == ' ' && sentence[i+1] != ' ' {
-			sentence[i+1] = bytes.ToUpper(sentence[i+1:i+2])[0]
+			sentence[i+1] = bytes.ToUpper(sentence[i+1 : i+2])[0]
 		}
 	}
 	if sentence[0] != ' ' {

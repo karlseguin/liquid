@@ -1,8 +1,8 @@
 package filters
 
 import (
-	"testing"
 	"github.com/karlseguin/gspec"
+	"testing"
 )
 
 func TestReturnsTheLastItem(t *testing.T) {
@@ -20,7 +20,7 @@ func TestReturnsTheLastItemIfOnlyOneItem(t *testing.T) {
 func TestReturnsTheLastItemOfAnArray(t *testing.T) {
 	spec := gspec.New(t)
 	filter := LastFactory(nil)
-	arr := [4]int{1,2,3,48}
+	arr := [4]int{1, 2, 3, 48}
 	spec.Expect(filter(arr).(int)).ToEqual(48)
 }
 

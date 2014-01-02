@@ -2,11 +2,12 @@ package filters
 
 import (
 	"bytes"
-	"reflect"
 	"github.com/karlseguin/liquid/helpers"
+	"reflect"
 )
 
 var defaultGlue = []byte(" ")
+
 // Creates a join filter
 func JoinFactory(parameters []string) Filter {
 	glue := defaultGlue

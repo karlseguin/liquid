@@ -1,8 +1,8 @@
 package filters
 
 import (
-	"testing"
 	"github.com/karlseguin/gspec"
+	"testing"
 )
 
 func TestReturnsTheFirstItem(t *testing.T) {
@@ -20,7 +20,7 @@ func TestReturnsTheFirstItemIfOnlyOneItem(t *testing.T) {
 func TestReturnsTheFirstItemOfAnArray(t *testing.T) {
 	spec := gspec.New(t)
 	filter := FirstFactory(nil)
-	arr := [4]int{12,2,3,48}
+	arr := [4]int{12, 2, 3, 48}
 	spec.Expect(filter(arr).(int)).ToEqual(12)
 }
 

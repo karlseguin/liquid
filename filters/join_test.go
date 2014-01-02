@@ -1,8 +1,8 @@
 package filters
 
 import (
-	"testing"
 	"github.com/karlseguin/gspec"
+	"testing"
 )
 
 func TestJoinsStringsWithTheSpecifiedGlue(t *testing.T) {

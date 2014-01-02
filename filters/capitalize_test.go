@@ -1,8 +1,8 @@
 package filters
 
 import (
-	"testing"
 	"github.com/karlseguin/gspec"
+	"testing"
 )
 
 func TestCapitalizesAString(t *testing.T) {
@@ -22,4 +22,3 @@ func TestCapitalizePassThroughOnInvalidType(t *testing.T) {
 	filter := DowncaseFactory(nil)
 	spec.Expect(filter(123).(int)).ToEqual(123)
 }
-
