@@ -37,7 +37,7 @@ The template's `Render` method takes a `map[string]interface{}` as its argument.
       "user": &User{"Duncan", &User{"Leto", nil}},
     })
 
-Notice that the template fields aren't case sensitive. If you're exporting fields such as `FirstName` and `Firstname` then shame on you.
+Notice that the template fields aren't case sensitive. If you're exporting fields such as `FirstName` and `Firstname` then shame on you. Make sure to downcase map keys.
 
 Complex objects should implement the `fmt.Stringer` interface (which is Go's toString() equivalent):
 
