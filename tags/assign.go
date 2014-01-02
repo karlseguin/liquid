@@ -1,28 +1,29 @@
 package tags
 
 import (
-	"errors"
-	"fmt"
+	// "errors"
+	// "fmt"
 	"github.com/karlseguin/liquid/core"
 )
 
 func AssignFactory(data, all []byte) (core.Token, error) {
-	var (
-		variable string
-		ok bool
-		values []string
-	)
+	return nil, nil
+	// var (
+	// 	variable string
+	// 	ok bool
+	// 	values []string
+	// )
 
-	if data, variable, ok = core.ExtractVariable(data); ok == false {
-		return nil, errors.New(fmt.Sprintf("invalid or missing variable in assign %q", all))
-	}
-	if data, ok = core.ExtractByte(data, '='); ok == false {
-		return nil, errors.New(fmt.Sprintf("missing = in assign %q", all))
-	}
-	if data, values, ok = core.ExtractValue(data); ok == false {
-		return nil, errors.New(fmt.Sprintf("invalid or missing value in assign %q", all))
-	}
-	return &Assign{variable, values}, nil
+	// if data, variable, ok = core.ExtractVariable(data); ok == false {
+	// 	return nil, errors.New(fmt.Sprintf("invalid or missing variable in assign %q", all))
+	// }
+	// if data, ok = core.ExtractByte(data, '='); ok == false {
+	// 	return nil, errors.New(fmt.Sprintf("missing = in assign %q", all))
+	// }
+	// if data, values, ok = core.ExtractValue(data); ok == false {
+	// 	return nil, errors.New(fmt.Sprintf("invalid or missing value in assign %q", all))
+	// }
+	// return &Assign{variable, values}, nil
 }
 
 type Assign struct {
