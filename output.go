@@ -101,8 +101,8 @@ func extractParameters(data, all []byte) ([]string, int, error) {
 	i := 0
 	l := len(data)
 	start := 0
+	escaped := 0
 	parameters := make([]string, 0, 1)
-
 	for ; i < l; i++ {
 		b := data[i]
 		if b == ' ' || b == ',' {
@@ -117,27 +117,39 @@ func extractParameters(data, all []byte) ([]string, int, error) {
 			i++
 		}
 		start = i
+
 		for j := start; j < l; j++ {
 			b := data[j]
-
 			if b == ',' || b == '|' || b == ' ' && quoted == false {
 				parameters = append(parameters, string(data[start:j]))
 				start = 0
 				i = j
 				break
-			} else if b == '\'' && data[j-1] != '\\' && quoted == true {
-				//todo unescape
-				parameters = append(parameters, string(data[start:j]))
-				start = 0
-				i = j + 1
-				break
+			} else if quoted == true && b == '\'' {
+				if data[j-1] == '\\' {
+					escaped++
+				} else {
+					if escaped > 0 {
+						parameters = append(parameters, string(unescape(data[start:j], escaped)))
+					} else {
+						parameters = append(parameters, string(data[start:j]))
+					}
+					start = 0
+					escaped = 0
+					i = j + 1
+					break
+				}
 			}
 		}
 		if quoted == true && (data[i-1] != '\'' || start > 0) {
 			return nil, 0, errors.New(fmt.Sprintf("Missing closing quote for parameter in %q", all))
 		}
 		if i == l-1 && start > 0 {
-			parameters = append(parameters, string(data[start:l]))
+			if escaped > 0 {
+				parameters = append(parameters, string(unescape(data[start:l], escaped)))
+			} else {
+				parameters = append(parameters, string(data[start:l]))
+			}
 			i = l
 		}
 	}

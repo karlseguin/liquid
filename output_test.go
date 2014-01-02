@@ -81,28 +81,29 @@ func TestOutputGeneratesErrorOnInvalidParameter(t *testing.T) {
 	spec.Expect(err.Error()).ToEqual(`Missing closing quote for parameter in "{{'fun' | debug: 'missing }}"`)
 }
 
-func TestStaticOutputWithASingleFilter(t *testing.T) {
+func TestOutputWithASingleFilter(t *testing.T) {
 	output, _ := outputExtractor([]byte("{{'fun' | debug }}"))
 	assertFilters(t, output.(*StaticOutput).Filters, "debug(0)")
 }
 
-func TestStaticOutputWithMultipleFilters(t *testing.T) {
+func TestOutputWithMultipleFilters(t *testing.T) {
 	output, _ := outputExtractor([]byte("{{'fun' | debug | debug}}"))
 	assertFilters(t, output.(*StaticOutput).Filters, "debug(0)", "debug(1)")
 }
 
-func TestStaticOutputWithMultipleFiltersHavingParameters(t *testing.T) {
+func TestOutputWithMultipleFiltersHavingParameters(t *testing.T) {
 	spec := gspec.New(t)
 	output, err := outputExtractor([]byte("{{'fun' | debug:1,2 | debug:'test' | debug : 'test' , 5}}"))
 	spec.Expect(err).ToBeNil()
 	assertFilters(t, output.(*StaticOutput).Filters, "debug(0, 1, 2)", "debug(1, test)", "debug(2, test, 5)")
 }
 
-// func TestOutputNoFiltersForDynamic(t *testing.T) {
-// 	spec := gspec.New(t)
-// 	output, _ := outputExtractor([]byte("{{ fun }}"))
-// 	spec.Expect(len(output.(*DynamicOutput).Filters)).ToEqual(0)
-// }
+func TestOutputWithAnEscapeParameter(t *testing.T) {
+	spec := gspec.New(t)
+	output, err := outputExtractor([]byte("{{'fun' | debug: 'te\\'st'}}"))
+	spec.Expect(err).ToBeNil()
+	assertFilters(t, output.(*StaticOutput).Filters, "debug(0, te'st)")
+}
 
 func assertDynamic(spec *gspec.S, output Token, expected ...string) {
 	d := output.(*DynamicOutput)
