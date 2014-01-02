@@ -14,7 +14,7 @@ func Last(input interface{}) interface{} {
 	value := reflect.ValueOf(input)
 	kind := value.Kind()
 
-	if (kind != reflect.Array && kind != reflect.Slice) {
+	if kind != reflect.Array && kind != reflect.Slice {
 		return input
 	}
 	len := value.Len()

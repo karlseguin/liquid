@@ -38,7 +38,7 @@ func outputExtractor(all []byte) (Token, error) {
 }
 
 func extractFilters(data, all []byte) ([]filters.Filter, error) {
-	filters := make([]filters.Filter, 0, 0)
+	filters := make([]filters.Filter, 0)
 	for i, l := 0, len(data); i < l; i++ {
 		b := data[i]
 		if b == ' ' {
@@ -55,7 +55,7 @@ func extractFilters(data, all []byte) ([]filters.Filter, error) {
 			return nil, errors.New(fmt.Sprintf("invalid tag %q", all))
 		}
 	}
-	return filters, nil
+	return trimFilters(filters), nil
 }
 
 func extracFilter(data, all []byte) (filters.Filter, int, error) {
@@ -142,4 +142,13 @@ func extractParameters(data, all []byte) ([]string, int, error) {
 		}
 	}
 	return parameters, i, nil
+}
+
+func trimFilters(values []filters.Filter) []filters.Filter {
+	if len(values) == cap(values) {
+		return values
+	}
+	trimmed := make([]filters.Filter, len(values))
+	copy(trimmed, values)
+	return trimmed
 }

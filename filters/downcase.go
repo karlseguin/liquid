@@ -14,9 +14,9 @@ func DowncaseFactory(parameters []string) Filter {
 func Downcase(input interface{}) interface{} {
 	switch typed := input.(type) {
 	case []byte:
-		return bytes.ToUpper(typed)
+		return bytes.ToLower(typed)
 	case string:
-		return strings.ToUpper(typed)
+		return strings.ToLower(typed)
 	default:
 		return input
 	}

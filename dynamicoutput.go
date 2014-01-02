@@ -31,13 +31,13 @@ func (o *DynamicOutput) Render(data interface{}) []byte {
 			value = filter(value)
 		}
 	}
-	return helpers.DataToBytes(value)
+	return helpers.ToBytes(value)
 }
 
 func createDynamicOutput(data, all []byte) (*DynamicOutput, int) {
 	i := 0
 	start := 0
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0)
 	for l := len(data); i < l; i++ {
 		b := data[i]
 		if b == ' ' {
@@ -50,7 +50,7 @@ func createDynamicOutput(data, all []byte) (*DynamicOutput, int) {
 		}
 	}
 	return &DynamicOutput{
-		Fields: helpers.TrimArrayOfStrings(fields),
+		Fields: helpers.TrimStrings(fields),
 	}, i
 }
 
