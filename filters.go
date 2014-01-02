@@ -21,4 +21,7 @@ var Filters = map[string]FilterFactory{
 	"minus":      filters.MinusFactory,
 	"size":       filters.SizeFactory,
 	"times":      filters.TimesFactory,
+	"divideby":   filters.DivideByFactory,
+	"prepend":    filters.PrependFactory,
+	"append":     filters.AppendFactory,
 }

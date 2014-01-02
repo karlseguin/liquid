@@ -26,8 +26,6 @@ The following filters are missing:
 - remove_first
 - truncate
 - truncatewords
-- prepend
-- append
 - split
 - modulo
 
@@ -47,7 +45,7 @@ The following tags are missing:
 Other:
 
 - Support for 'now'
-- Render can generate far less temporary objects
+- Render can generate far less objects
 
 ## Template Cache
 By default the templates are cached in a pretty dumb cache based. That is, once in the cache, items stay in the cache (there's no expiry). The cache can be disabled, on a per-template basis, via:
