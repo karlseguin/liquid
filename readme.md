@@ -15,7 +15,6 @@ The following filters are missing:
 - date
 - sort
 - map
-- size
 - escape
 - escape_once
 - strip_html

@@ -10,7 +10,7 @@ var defaultJoin = &JoinFilter{[]byte(" ")}
 
 // Creates a join filter
 func JoinFactory(parameters []string) Filter {
-	if len(parameters) == 0 {
+	if len(parameters) == 0 || parameters[0] == " " {
 		return defaultJoin.Join
 	}
 	return (&JoinFilter{[]byte(parameters[0])}).Join

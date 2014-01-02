@@ -9,7 +9,7 @@ var defaultPlus = &IntPlusFilter{1, "1"}
 
 // Creates a plus filter
 func PlusFactory(parameters []string) Filter {
-	if len(parameters) == 0 {
+	if len(parameters) == 0 || parameters[0] == "1" {
 		return defaultPlus.Plus
 	}
 	if i, err := strconv.Atoi(parameters[0]); err == nil {
