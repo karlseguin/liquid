@@ -21,6 +21,10 @@ func (r *Raw) IsEnd() bool {
 	return false
 }
 
+func (r *Raw) HasEnd() bool {
+	return true
+}
+
 func (r *Raw) Render(data map[string]interface{}) []byte {
 	return []byte{}
 }

@@ -9,7 +9,7 @@ import (
 )
 
 // A tag factory creates a tag based on the raw data
-type TagFactory func(data []byte) (core.Token, error)
+type TagFactory func(data, all []byte) (core.Token, error)
 
 var TagEnds = map[string]core.Tag {
 	"endcomment": tags.EndComment,
@@ -19,6 +19,7 @@ var TagEnds = map[string]core.Tag {
 var Tags = map[string]TagFactory{
 	"comment": tags.CommentFactory,
 	"raw": tags.RawFactory,
+	"assign": tags.AssignFactory,
 }
 
 func tagExtractor(all []byte) (core.Token, error) {
@@ -42,7 +43,7 @@ func tagExtractor(all []byte) (core.Token, error) {
 		if i < l {
 			data = data[i+1:]
 		}
-		return factory(data)
+		return factory(data, all)
 	}
 	return nil, errors.New(fmt.Sprintf("unknown tag %q at %q", tagName, all))
 }

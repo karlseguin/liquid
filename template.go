@@ -135,6 +135,8 @@ func extractTokens(data []byte, container core.Container) error {
 						}
 						container.AddToken(literal)
 						i+= length
+					} else if name == "assign" {
+						continue
 					} else if closed, related := container.AddTag(tag); closed {
 						stack, container = popContainerStack(stack)
 					} else if tag.IsEnd() {

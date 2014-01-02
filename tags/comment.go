@@ -6,7 +6,7 @@ import (
 
 var theOneComment = new(Comment)
 
-func CommentFactory(data []byte) (core.Token, error) {
+func CommentFactory(data, all []byte) (core.Token, error) {
 	return theOneComment, nil
 }
 

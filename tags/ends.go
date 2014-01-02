@@ -22,7 +22,7 @@ func (e *EndTag) IsEnd() bool {
 }
 
 func (e *EndTag) Render(data map[string]interface{}) []byte {
-	panic("render should not be called on an end tag")
+	panic("Render should not be called on an end tag")
 }
 
 func (e *EndTag) AddToken(token core.Token) {
