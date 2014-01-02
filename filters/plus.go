@@ -5,10 +5,12 @@ import (
 	"time"
 )
 
+var defaultPlus = &IntPlusFilter{1, "1"}
+
 // Creates a plus filter
 func PlusFactory(parameters []string) Filter {
 	if len(parameters) == 0 {
-		return (&IntPlusFilter{1, "1"}).Plus
+		return defaultPlus.Plus
 	}
 	if i, err := strconv.Atoi(parameters[0]); err == nil {
 		return (&IntPlusFilter{i, parameters[0]}).Plus

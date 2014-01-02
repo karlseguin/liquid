@@ -6,18 +6,14 @@ import (
 	"reflect"
 )
 
-var defaultGlue = []byte(" ")
+var defaultJoin = &JoinFilter{[]byte(" ")}
 
 // Creates a join filter
 func JoinFactory(parameters []string) Filter {
-	glue := defaultGlue
-	if len(parameters) > 0 {
-		glue = []byte(parameters[0])
+	if len(parameters) == 0 {
+		return defaultJoin.Join
 	}
-	j := &JoinFilter{
-		glue: glue,
-	}
-	return j.Join
+	return (&JoinFilter{[]byte(parameters[0])}).Join
 }
 
 type JoinFilter struct {
