@@ -4,20 +4,31 @@ import (
 	"github.com/karlseguin/liquid/core"
 )
 
+var (
+	defaultTruncateLimit  = &core.StaticIntValue{50}
+	defaultTruncateAppend = &core.StaticStringValue{[]byte("...")}
+	defaultTruncate       = &TruncateFilter{defaultTruncateLimit, defaultTruncateAppend}
+)
+
 // Creates an append filter
 func TruncateFactory(parameters []core.Value) Filter {
-	if len(parameters) == 0 {
-		return Noop
+	switch len(parameters) {
+	case 0:
+		return defaultTruncate.Truncate
+	case 1:
+		return (&TruncateFilter{parameters[0], defaultTruncateAppend}).Truncate
+	default:
+		return (&TruncateFilter{parameters[0], parameters[1]}).Truncate
 	}
-	return (&TruncateFilter{parameters[0]}).Truncate
 }
 
 type TruncateFilter struct {
-	value core.Value
+	limit  core.Value
+	append core.Value
 }
 
 func (t *TruncateFilter) Truncate(input interface{}, data map[string]interface{}) interface{} {
-	length, ok := core.ToInt(t.value.Resolve(data))
+	length, ok := core.ToInt(t.limit.Resolve(data))
 	if ok == false {
 		return input
 	}
@@ -30,8 +41,10 @@ func (t *TruncateFilter) Truncate(input interface{}, data map[string]interface{}
 		value = core.ToString(typed)
 	}
 
+	append := core.ToString(t.append.Resolve(data))
+	length -= len(append)
 	if length > len(value) {
 		return input
 	}
-	return value[:length]
+	return value[:length] + append
 }
