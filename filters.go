@@ -25,7 +25,7 @@ var Filters = map[string]FilterFactory{
 	// "divideby":       filters.DivideByFactory,
 	"prepend":        filters.PrependFactory,
 	"append":         filters.AppendFactory,
-	// "strip_newlines": filters.StripNewLinesFactory,
+	"strip_newlines": filters.StripNewLinesFactory,
 	"replace":        filters.ReplaceFactory,
 	"replace_first":  filters.ReplaceFirstFactory,
 	"remove":         filters.RemoveFactory,
