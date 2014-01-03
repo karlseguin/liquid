@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-var defaultPlus = &IntPlusFilter{1}
+var defaultPlus = (&IntPlusFilter{1}).Plus
 
 // Creates a plus filter
 func PlusFactory(parameters []core.Value) Filter {
 	if len(parameters) == 0 {
-		return defaultPlus.Plus
+		return defaultPlus
 	}
 	switch typed := parameters[0].(type) {
 	case *core.StaticIntValue:

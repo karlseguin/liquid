@@ -4,12 +4,12 @@ import (
 	"github.com/karlseguin/liquid/core"
 )
 
-var defaultMinus = &IntPlusFilter{-1}
+var defaultMinus = (&IntPlusFilter{-1}).Plus
 
 // Creates a minus filter
 func MinusFactory(parameters []core.Value) Filter {
 	if len(parameters) == 0 {
-		return defaultMinus.Plus
+		return defaultMinus
 	}
 	switch typed := parameters[0].(type) {
 	case *core.StaticIntValue:

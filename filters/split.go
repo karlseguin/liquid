@@ -5,12 +5,12 @@ import (
 	"strings"
 )
 
-var defaultSplit = &SplitFilter{&core.StaticStringValue{[]byte(" ")}}
+var defaultSplit = (&SplitFilter{&core.StaticStringValue{[]byte(" ")}}).Split
 
 // Creates a join filter
 func SplitFactory(parameters []core.Value) Filter {
 	if len(parameters) == 0 {
-		return defaultSplit.Split
+		return defaultSplit
 	}
 	return (&SplitFilter{parameters[0]}).Split
 }

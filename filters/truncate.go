@@ -7,14 +7,14 @@ import (
 var (
 	defaultTruncateLimit  = &core.StaticIntValue{50}
 	defaultTruncateAppend = &core.StaticStringValue{[]byte("...")}
-	defaultTruncate       = &TruncateFilter{defaultTruncateLimit, defaultTruncateAppend}
+	defaultTruncate       = (&TruncateFilter{defaultTruncateLimit, defaultTruncateAppend}).Truncate
 )
 
 // Creates an truncate filter
 func TruncateFactory(parameters []core.Value) Filter {
 	switch len(parameters) {
 	case 0:
-		return defaultTruncate.Truncate
+		return defaultTruncate
 	case 1:
 		return (&TruncateFilter{parameters[0], defaultTruncateAppend}).Truncate
 	default:

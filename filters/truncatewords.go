@@ -6,14 +6,14 @@ import (
 
 var (
 	defaultTruncateWordsLimit = &core.StaticIntValue{15}
-	defaultTruncateWords      = &TruncateWordsFilter{defaultTruncateWordsLimit, defaultTruncateAppend}
+	defaultTruncateWords      = (&TruncateWordsFilter{defaultTruncateWordsLimit, defaultTruncateAppend}).Truncate
 )
 
 // Creates an truncatewords filter
 func TruncateWordsFactory(parameters []core.Value) Filter {
 	switch len(parameters) {
 	case 0:
-		return defaultTruncateWords.Truncate
+		return defaultTruncateWords
 	case 1:
 		return (&TruncateWordsFilter{parameters[0], defaultTruncateAppend}).Truncate
 	default:
