@@ -20,5 +20,5 @@ func TestUpcasesBytes(t *testing.T) {
 func TestUpcasesPassThroughOnInvalidType(t *testing.T) {
 	spec := gspec.New(t)
 	filter := UpcaseFactory(nil)
-	spec.Expect(filter(123, nil	).(int)).ToEqual(123)
+	spec.Expect(filter(123, nil).(int)).ToEqual(123)
 }

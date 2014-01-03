@@ -2,8 +2,8 @@ package filters
 
 import (
 	"bytes"
-	"strings"
 	"github.com/karlseguin/liquid/core"
+	"strings"
 )
 
 // Creates a upcase filter

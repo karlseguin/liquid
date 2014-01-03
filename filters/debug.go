@@ -1,8 +1,8 @@
 package filters
 
 import (
-	"strings"
 	"github.com/karlseguin/liquid/core"
+	"strings"
 )
 
 func DebugFactory(parameter []core.Value) Filter {

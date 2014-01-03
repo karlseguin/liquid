@@ -21,7 +21,7 @@ func TestPrependToBytes(t *testing.T) {
 func TestPrependADynamicValue(t *testing.T) {
 	spec := gspec.New(t)
 	filter := PrependFactory([]core.Value{dynamicValue("local.currency")})
-	data := map[string]interface{} {
+	data := map[string]interface{}{
 		"local": map[string]string{
 			"currency": "$",
 		},

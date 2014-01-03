@@ -56,7 +56,7 @@ func (p *Parser) ToMarkup() ([]byte, int) {
 	}
 	pre := EmptyBytes
 	if p.Position > start {
-		pre = p.Data[start : p.Position]
+		pre = p.Data[start:p.Position]
 	}
 	p.Commit()
 	return pre, markupType

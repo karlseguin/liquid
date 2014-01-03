@@ -64,7 +64,7 @@ func TestOutputGeneratesErrorOnUnknownFilter(t *testing.T) {
 func TestOutputGeneratesErrorOnInvalidParameter(t *testing.T) {
 	spec := gspec.New(t)
 	_, err := newOutput(core.NewParser([]byte("{{'fun' | debug: 'missing }}")))
-spec.Expect(err.Error()).ToEqual(`Invalid value, a single quote might be missing ("{{'fun' | debug: 'missing }}" - line 1)`)
+	spec.Expect(err.Error()).ToEqual(`Invalid value, a single quote might be missing ("{{'fun' | debug: 'missing }}" - line 1)`)
 }
 
 func TestOutputWithASingleFilter(t *testing.T) {

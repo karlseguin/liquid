@@ -1,8 +1,8 @@
 package core
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 )
 
 type DynamicValue struct {

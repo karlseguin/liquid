@@ -97,7 +97,7 @@ func dynamicValue(s string) core.Value {
 
 func params(values ...interface{}) map[string]interface{} {
 	m := make(map[string]interface{})
-	for i := 0; i < len(values); i +=2 {
+	for i := 0; i < len(values); i += 2 {
 		m[values[i].(string)] = values[i+1]
 	}
 	return m
