@@ -28,6 +28,6 @@ func (a *AppendFilter) Append(input interface{}, data map[string]interface{}) in
 	case string:
 		return typed + value
 	default:
-		return string(core.ToBytes(input)) + value
+		return core.ToString(input) + value
 	}
 }

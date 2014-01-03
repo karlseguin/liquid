@@ -69,3 +69,32 @@ func ToString(data interface{}) string {
 		return string(ToBytes(data))
 	}
 }
+
+// Convert arbitrary data to string
+func ToInt(data interface{}) (int, bool) {
+	switch typed := data.(type) {
+	case int:
+		return typed, true
+	case int32:
+		return int(typed), true
+	case int64:
+		return int(typed), true
+	case uint:
+		return int(typed), true
+	case float64:
+		return int(typed), true
+	case string:
+		return stringToInt(typed)
+	case []byte:
+		return stringToInt(string(typed))
+	default:
+		return 0, false
+	}
+}
+
+func stringToInt(s string) (int, bool) {
+	if n, err := strconv.Atoi(s); err == nil {
+		return n, true
+	}
+	return 0, false
+}

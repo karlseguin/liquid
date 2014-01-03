@@ -28,6 +28,6 @@ func (a *PrependFilter) Prepend(input interface{}, data map[string]interface{}) 
 	case string:
 		return value + typed
 	default:
-		return value + string(core.ToBytes(input))
+		return value + core.ToString(typed)
 	}
 }

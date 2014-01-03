@@ -20,7 +20,6 @@ The following filters are missing:
 - escape
 - escape_once
 - strip_html
-- truncate
 - truncatewords
 
 The following tags are missing (all):
