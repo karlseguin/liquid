@@ -30,6 +30,7 @@ var Filters = map[string]FilterFactory{
 	"replace_first":  filters.ReplaceFirstFactory,
 	"remove":         filters.RemoveFactory,
 	"remove_first":   filters.RemoveFirstFactory,
+	"newline_to_br":  filters.NewLineToBrFactory,
 	"split":          filters.SplitFactory,
 	"modulo":         filters.ModuloFactory,
 	"truncate":       filters.TruncateFactory,
