@@ -17,7 +17,6 @@ The following filters are missing:
 - date
 - sort
 - map
-- strip_html
 
 The following tags are missing (all):
 
