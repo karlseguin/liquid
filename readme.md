@@ -1,4 +1,4 @@
-**In the middle of rewriting the parser, nothing's really working**
+**Parser rewrite. Tag support is completely gone**
 
 # Liquid Templates For Go
 
@@ -25,7 +25,7 @@ The following filters are missing:
 - split
 - modulo
 
-The following tags are missing:
+The following tags are missing (all):
 
 - assign
 - capture
