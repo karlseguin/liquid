@@ -11,20 +11,22 @@ import (
 	"io/ioutil"
 )
 
-type TokenExtractor func(data []byte) (core.Token, error)
-
 // A compiled liquid template
 type Template struct {
-	Tokens []core.Token
+	Code []core.Code
 }
 
-func (t *Template) AddToken(token core.Token) {
-	t.Tokens = append(t.Tokens, token)
+func (t *Template) AddCode(code core.Code) {
+	t.Code = append(t.Code, code)
 }
 
 func (t *Template) AddTag(tag core.Tag) (bool, bool) {
-	t.AddToken(tag)
+	t.AddCode(tag)
 	return false, false
+}
+
+func (t *Template) IsEnd() bool {
+	return false
 }
 
 func (t *Template) Name() string {
@@ -71,8 +73,8 @@ func ParseFile(path string, config *Configuration) (*Template, error) {
 
 func (t *Template) Render(data map[string]interface{}) []byte {
 	buffer := new(bytes.Buffer)
-	for _, token := range t.Tokens {
-		buffer.Write(token.Render(data))
+	for _, code := range t.Code {
+		buffer.Write(code.Render(data))
 	}
 	return buffer.Bytes()
 }
@@ -86,28 +88,29 @@ func buildTemplate(data []byte) (*Template, error) {
 	return template, nil
 }
 
-func extractTokens(parser *core.Parser, container core.Container) error {
+func extractTokens(parser *core.Parser, container core.Tag) error {
 	// stack := make([]core.Container, 0, 0)
 
 	for parser.HasMore() {
 		pre, markupType := parser.ToMarkup()
-		if len(pre) > 0  {
-			container.AddToken(newLiteral(pre))
+		if len(pre) > 0 {
+			container.AddCode(newLiteral(pre))
 		}
 		if markupType == 0 {
 			break
 		}
 		if markupType == core.OutputMarkup {
-			token, err := buildOutputTag(parser)
-			if err != nil { return err }
-			if token != nil {
-				container.AddToken(token)
+			code, err := buildOutputTag(parser)
+			if err != nil {
+				return err
+			}
+			if code != nil {
+				container.AddCode(code)
 			}
 		}
 	}
 
 	// for i, l := 0, len(data)-1; i < l; i++ {
-
 
 	// 	if type := parser.ToMarkup(); type == 0 {}
 	// 	current := data[i]

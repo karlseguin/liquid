@@ -5,20 +5,19 @@ import (
 	"github.com/karlseguin/liquid/filters"
 )
 
-func buildOutputTag(parser *core.Parser) (core.Token, error) {
+func buildOutputTag(parser *core.Parser) (core.Code, error) {
 	value, isStatic, err := parser.ReadValue()
 	if err != nil {
 		return nil, err
 	}
 
-	parser.SkipSpaces()
 	var filters []filters.Filter
-	if parser.Current() == '|' {
+	if parser.SkipSpaces() == '|' {
 		parser.Forward()
-		var err error
-		if filters, err = buildFilters(parser); err != nil {
-			return nil, err
-		}
+		// var err error
+		// if filters, err = buildFilters(parser); err != nil {
+		// 	return nil, err
+		// }
 		filters = trimFilters(filters)
 	}
 
@@ -31,9 +30,6 @@ func buildOutputTag(parser *core.Parser) (core.Token, error) {
 	}
 	return &DynamicOutput{Fields: value.([]string), Filters: filters}, nil
 }
-
-
-
 
 // 	//strip out leading and trailing {{ }}
 // 	data := all[2 : len(all)-2]

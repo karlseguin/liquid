@@ -2,13 +2,13 @@ package core
 
 import (
 	"errors"
-	"strings"
 	"fmt"
+	"strings"
 )
 
 const (
 	OutputMarkup = 1
-	TagMarkup = 2
+	TagMarkup    = 2
 )
 
 var (
@@ -16,20 +16,20 @@ var (
 )
 
 type Parser struct {
-	Position int
-	Data []byte
-	Len int
-	End int
+	Position       int
+	Data           []byte
+	Len            int
+	End            int
 	UncommitedLine int
-	Line int
+	Line           int
 }
 
 func NewParser(data []byte) *Parser {
 	parser := &Parser{
-		Position: 0,
-		Data: data,
-		Len: len(data),
-		Line: 1,
+		Position:       0,
+		Data:           data,
+		Len:            len(data),
+		Line:           1,
 		UncommitedLine: 1,
 	}
 	parser.End = parser.Len - 1
@@ -40,7 +40,9 @@ func (p *Parser) ToMarkup() ([]byte, int) {
 	start := p.Position
 	markupType := 0
 	for ; p.Position < p.Len; p.Position++ {
-		if p.Current() != '{' { continue }
+		if p.Current() != '{' {
+			continue
+		}
 		next := p.Peek()
 		if next == '{' || next == '%' {
 			p.Forward()
@@ -54,7 +56,7 @@ func (p *Parser) ToMarkup() ([]byte, int) {
 	pre := EmptyBytes
 	if p.Position > start {
 		if markupType != 0 {
-			pre = p.Data[start:p.Position - 2]
+			pre = p.Data[start : p.Position-2]
 		} else {
 			pre = p.Data[start:p.Position]
 		}
@@ -63,21 +65,24 @@ func (p *Parser) ToMarkup() ([]byte, int) {
 	return pre, markupType
 }
 
-func (p *Parser) SkipSpaces()  {
+func (p *Parser) SkipSpaces() (current byte) {
 	for ; p.Position < p.Len; p.Position++ {
-		if p.Current() != ' ' {
+		c := p.Current()
+		if c != ' ' {
+			current = c
 			break
 		}
 	}
 	p.Commit()
+	return
 }
 
 func (p *Parser) ReadValue() (interface{}, bool, error) {
-	p.SkipSpaces()
-	if p.HasMore() == false {
+	current := p.SkipSpaces()
+	if current == 0 || current == '}' {
 		return EmptyBytes, true, nil
 	}
-	if p.Current() == '\'' {
+	if current == '\'' {
 		p.Forward()
 		static, err := p.ReadStaticValue()
 		if err != nil {
@@ -87,7 +92,6 @@ func (p *Parser) ReadValue() (interface{}, bool, error) {
 	}
 	return p.ReadDynamicValues(), false, nil
 }
-
 
 func (p *Parser) ReadStaticValue() ([]byte, error) {
 	escaped := 0
@@ -109,7 +113,7 @@ func (p *Parser) ReadStaticValue() ([]byte, error) {
 	if escaped > 0 {
 		return unescape(p.Data[start:p.Position-1], escaped), nil
 	}
-	return detatch(p.Data[start:p.Position-1]), nil
+	return detatch(p.Data[start : p.Position-1]), nil
 }
 
 func (p *Parser) ReadDynamicValues() []string {
@@ -130,7 +134,9 @@ func (p *Parser) ReadDynamicValues() []string {
 }
 
 func (p *Parser) Peek() byte {
-	if p.Position == p.End { return 0 }
+	if p.Position == p.End {
+		return 0
+	}
 	return p.Data[p.Position+1]
 }
 
@@ -154,12 +160,15 @@ func (p *Parser) Forward() {
 	p.Position++
 }
 
-func (p *Parser) SkipUntil(b byte) {
+func (p *Parser) SkipUntil(b byte) (current byte) {
 	for ; p.Position < p.Len; p.Position++ {
 		if p.Current() == b {
-			return
+			current = b
+			break
 		}
 	}
+	p.Commit()
+	return
 }
 
 func (p *Parser) Error(s string, start int) error {
@@ -177,7 +186,6 @@ func (p *Parser) Snapshot(start int) []byte {
 	}
 	return p.Data[start:end]
 }
-
 
 func unescape(data []byte, escaped int) []byte {
 	value := make([]byte, len(data)-escaped)

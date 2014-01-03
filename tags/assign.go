@@ -28,7 +28,7 @@ func AssignFactory(data, all []byte) (core.Token, error) {
 
 type Assign struct {
 	variable string
-	values []string
+	values   []string
 }
 
 func (a *Assign) Name() string {

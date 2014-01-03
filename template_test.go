@@ -8,7 +8,7 @@ import (
 func TestParsesATextOnlyTemplate(t *testing.T) {
 	spec := gspec.New(t)
 	template, _ := ParseString("it's over 9000", nil)
-	spec.Expect(len(template.Tokens)).ToEqual(1)
+	spec.Expect(len(template.Code)).ToEqual(1)
 	assertLiteral(t, template, 0, "it's over 9000")
 }
 
@@ -41,9 +41,9 @@ func TestRendersOutputTagsWithStructs(t *testing.T) {
 }
 
 func assertLiteral(t *testing.T, template *Template, index int, expected string) {
-	actual := string(template.Tokens[index].(*Literal).Value)
+	actual := string(template.Code[index].(*Literal).Value)
 	if actual != expected {
-		t.Errorf("Expected token %d to be a literal with value %q, got %q", index, expected, actual)
+		t.Errorf("Expected code %d to be a literal with value %q, got %q", index, expected, actual)
 	}
 }
 

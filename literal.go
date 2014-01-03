@@ -8,12 +8,9 @@ type Literal struct {
 	Value []byte
 }
 
-func newLiteral(data []byte) core.Token {
-	l := &Literal{
-		Value: make([]byte, len(data)),
-	}
-	copy(l.Value, data)
-	return l
+// Creates a literal (just plain text)
+func newLiteral(data []byte) core.Code {
+	return &Literal{Value: data}
 }
 
 func (l *Literal) Render(data map[string]interface{}) []byte {

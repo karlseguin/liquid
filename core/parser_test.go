@@ -1,8 +1,8 @@
 package core
 
 import (
-	"testing"
 	"github.com/karlseguin/gspec"
+	"testing"
 )
 
 func TestParserToMarkupWhenTheresNoMarkup(t *testing.T) {
@@ -51,6 +51,17 @@ func TestParserSkipsSpacesWhenThereAreSpaces(t *testing.T) {
 func TestParserParsesAnEmptyValue(t *testing.T) {
 	spec := gspec.New(t)
 	parser := newParser("  ")
+	v, static, err := parser.ReadValue()
+	value := string(v.([]byte))
+	spec.Expect(err).ToBeNil()
+	spec.Expect(static).ToEqual(true)
+	spec.Expect(value).ToEqual("")
+	spec.Expect(parser.Position).ToEqual(2)
+}
+
+func TestParserParsesAnEmptyValue2(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser("  }}")
 	v, static, err := parser.ReadValue()
 	value := string(v.([]byte))
 	spec.Expect(err).ToBeNil()
