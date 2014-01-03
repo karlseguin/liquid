@@ -39,5 +39,6 @@ var Filters = map[string]FilterFactory{
 	"escape":         filters.EscapeFactory,
 	"escape_once":    filters.EscapeOnceFactory,
 	"sort":           filters.SortFactory,
-	"default": filters.DefaultFactory,
+	"default":        filters.DefaultFactory,
+	"reverse":        filters.ReverseFactory,
 }
