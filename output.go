@@ -1,6 +1,7 @@
 package liquid
 
 import (
+	"fmt"
 	"github.com/karlseguin/liquid/core"
 	"github.com/karlseguin/liquid/filters"
 )
@@ -14,10 +15,10 @@ func buildOutputTag(parser *core.Parser) (core.Code, error) {
 	var filters []filters.Filter
 	if parser.SkipSpaces() == '|' {
 		parser.Forward()
-		// var err error
-		// if filters, err = buildFilters(parser); err != nil {
-		// 	return nil, err
-		// }
+		var err error
+		if filters, err = buildFilters(parser); err != nil {
+			return nil, err
+		}
 		filters = trimFilters(filters)
 	}
 
@@ -29,6 +30,23 @@ func buildOutputTag(parser *core.Parser) (core.Code, error) {
 		return &StaticOutput{Value: v, Filters: filters}, nil
 	}
 	return &DynamicOutput{Fields: value.([]string), Filters: filters}, nil
+}
+
+func buildFilters(p *core.Parser) ([]filters.Filter, error) {
+	start := p.Position
+	filters := make([]filters.Filter, 0, 5)
+	for name := p.ReadName(); name != ""; name = p.ReadName() {
+		factory, exists := Filters[name]
+		if exists == false {
+			return nil, p.Error(fmt.Sprintf("Unknown filter %q", name), start)
+		}
+		var parameters []string
+		if p.SkipSpaces() == ':' {
+
+		}
+		filters = append(filters, factory(parameters))
+	}
+	return filters, nil
 }
 
 // 	//strip out leading and trailing {{ }}

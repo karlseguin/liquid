@@ -133,6 +133,21 @@ func (p *Parser) ReadDynamicValues() []string {
 	return TrimStrings(values)
 }
 
+func (p *Parser) ReadName() string {
+	var name string
+	p.SkipSpaces()
+	marker := p.Position
+	for ; p.Position < p.Len; p.Position++ {
+		current := p.Current()
+		if current == ' ' || current == '|' || current == '}' || current == '%' || current == ':' {
+			name = string(p.Data[marker:p.Position])
+			break
+		}
+	}
+	p.Commit()
+	return name
+}
+
 func (p *Parser) Peek() byte {
 	if p.Position == p.End {
 		return 0
@@ -176,11 +191,11 @@ func (p *Parser) Error(s string, start int) error {
 }
 
 func (p *Parser) Snapshot(start int) []byte {
-	start = start - 10
+	start = start - 20
 	if start < 0 {
 		start = 0
 	}
-	end := start + 30
+	end := start + 50
 	if end > p.Len {
 		end = p.Len
 	}

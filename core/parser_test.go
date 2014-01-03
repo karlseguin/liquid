@@ -125,6 +125,41 @@ func TestParserParsesAMultiLevelDynamicValue(t *testing.T) {
 	spec.Expect(parser.Position).ToEqual(16)
 }
 
+func TestParserReadsAnEmptyName1(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser("  ")
+	spec.Expect(parser.ReadName()).ToEqual("")
+	spec.Expect(parser.Position).ToEqual(2)
+}
+
+func TestParserReadsAnEmptyName2(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser("   }}")
+	spec.Expect(parser.ReadName()).ToEqual("")
+	spec.Expect(parser.Position).ToEqual(3)
+}
+
+func TestParserReadsAnEmptyName3(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser("%}")
+	spec.Expect(parser.ReadName()).ToEqual("")
+	spec.Expect(parser.Position).ToEqual(0)
+}
+
+func TestParserReadsAnEmptyName4(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser(" |")
+	spec.Expect(parser.ReadName()).ToEqual("")
+	spec.Expect(parser.Position).ToEqual(1)
+}
+
+func TestParserReadsAName(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser(" spice }}")
+	spec.Expect(parser.ReadName()).ToEqual("spice")
+	spec.Expect(parser.Position).ToEqual(6)
+}
+
 func newParser(s string) *Parser {
 	return NewParser([]byte(s))
 }

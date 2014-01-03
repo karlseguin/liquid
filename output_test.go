@@ -73,7 +73,7 @@ func TestOutputNoFiltersForStatic(t *testing.T) {
 func TestOutputGeneratesErrorOnUnknownFilter(t *testing.T) {
 	spec := gspec.New(t)
 	_, err := buildOutputTag(core.NewParser([]byte("'fun' | unknown }}")))
-	spec.Expect(err.Error()).ToEqual(`Unknown filter "unknown" in "{{'fun' | unknown }}"`)
+	spec.Expect(err.Error()).ToEqual(`Unknown filter "unknown" ("'fun' | unknown }}" - line 1)`)
 }
 
 func TestOutputGeneratesErrorOnInvalidParameter(t *testing.T) {
