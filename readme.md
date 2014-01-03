@@ -14,7 +14,6 @@ Given a file path, liquid can also `ParseFile`. Give a `[]byte` it can also simp
 ## What's Missing
 The following filters are missing:
 
-- date
 - map
 
 The following tags are missing (all):
