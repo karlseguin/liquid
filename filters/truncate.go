@@ -10,7 +10,7 @@ var (
 	defaultTruncate       = &TruncateFilter{defaultTruncateLimit, defaultTruncateAppend}
 )
 
-// Creates an append filter
+// Creates an truncate filter
 func TruncateFactory(parameters []core.Value) Filter {
 	switch len(parameters) {
 	case 0:
@@ -43,8 +43,11 @@ func (t *TruncateFilter) Truncate(input interface{}, data map[string]interface{}
 
 	append := core.ToString(t.append.Resolve(data))
 	length -= len(append)
-	if length > len(value) {
+	if length >= len(value) {
 		return input
+	}
+	if length < 0 {
+		return append
 	}
 	return value[:length] + append
 }

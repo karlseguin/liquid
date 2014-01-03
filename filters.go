@@ -34,4 +34,5 @@ var Filters = map[string]FilterFactory{
 	"split":          filters.SplitFactory,
 	"modulo":         filters.ModuloFactory,
 	"truncate":       filters.TruncateFactory,
+	"truncatewords":  filters.TruncateWordsFactory,
 }
