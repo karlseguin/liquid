@@ -35,4 +35,6 @@ var Filters = map[string]FilterFactory{
 	"modulo":         filters.ModuloFactory,
 	"truncate":       filters.TruncateFactory,
 	"truncatewords":  filters.TruncateWordsFactory,
+	"escape":         filters.EscapeFactory,
+	"escape_once":    filters.EscapeOnceFactory,
 }
