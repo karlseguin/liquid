@@ -6,22 +6,23 @@ import (
 	"reflect"
 )
 
-var defaultJoin = &JoinFilter{[]byte(" ")}
+var defaultJoin = &JoinFilter{&core.StaticStringValue{[]byte(" ")}}
 
 // Creates a join filter
-func JoinFactory(parameters []string) Filter {
-	if len(parameters) == 0 || parameters[0] == " " {
+func JoinFactory(parameters []core.Value) Filter {
+	if len(parameters) == 0 {
 		return defaultJoin.Join
 	}
-	return (&JoinFilter{[]byte(parameters[0])}).Join
+	return (&JoinFilter{parameters[0]}).Join
 }
 
 type JoinFilter struct {
-	glue []byte
+	glue core.Value
 }
 
 // join elements of the array with certain character between them
-func (f *JoinFilter) Join(input interface{}) interface{} {
+func (f *JoinFilter) Join(input interface{}, data map[string]interface{}) interface{} {
+
 	value := reflect.ValueOf(input)
 	kind := value.Kind()
 	if kind != reflect.Array && kind != reflect.Slice {
@@ -37,5 +38,6 @@ func (f *JoinFilter) Join(input interface{}) interface{} {
 		array[i] = core.ToBytes(value.Index(i).Interface())
 	}
 
-	return bytes.Join(array, f.glue)
+	glue := core.ToBytes(f.glue.Resolve(data))
+	return bytes.Join(array, glue)
 }

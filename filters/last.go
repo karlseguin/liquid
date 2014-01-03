@@ -2,15 +2,16 @@ package filters
 
 import (
 	"reflect"
+	"github.com/karlseguin/liquid/core"
 )
 
 // Creates a last filter
-func LastFactory(parameters []string) Filter {
+func LastFactory(parameters []core.Value) Filter {
 	return Last
 }
 
 // get the last element of the passed in array
-func Last(input interface{}) interface{} {
+func Last(input interface{}, data map[string]interface{}) interface{} {
 	value := reflect.ValueOf(input)
 	kind := value.Kind()
 

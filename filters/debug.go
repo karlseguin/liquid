@@ -2,20 +2,26 @@ package filters
 
 import (
 	"strings"
+	"github.com/karlseguin/liquid/core"
 )
 
-func DebugFactory(parameter []string) Filter {
+func DebugFactory(parameter []core.Value) Filter {
 	debug := &DebugFilter{parameter}
 	return debug.Debug
 }
 
 type DebugFilter struct {
-	parameters []string
+	parameters []core.Value
 }
 
-func (f *DebugFilter) Debug(input interface{}) interface{} {
-	if len(f.parameters) == 0 {
+func (f *DebugFilter) Debug(input interface{}, data map[string]interface{}) interface{} {
+	l := len(f.parameters)
+	if l == 0 {
 		return []byte("debug(" + input.(string) + ")")
 	}
-	return []byte("debug(" + input.(string) + ", " + strings.Join(f.parameters, ", ") + ")")
+	values := make([]string, l)
+	for i := 0; i < l; i++ {
+		values[i] = string(core.ToBytes(f.parameters[i].Resolve(data)))
+	}
+	return []byte("debug(" + input.(string) + ", " + strings.Join(values, ", ") + ")")
 }

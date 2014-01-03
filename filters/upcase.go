@@ -3,15 +3,16 @@ package filters
 import (
 	"bytes"
 	"strings"
+	"github.com/karlseguin/liquid/core"
 )
 
 // Creates a upcase filter
-func UpcaseFactory(parameters []string) Filter {
+func UpcaseFactory(parameters []core.Value) Filter {
 	return Upcase
 }
 
 // convert an input string to uppercase
-func Upcase(input interface{}) interface{} {
+func Upcase(input interface{}, data map[string]interface{}) interface{} {
 	switch typed := input.(type) {
 	case []byte:
 		return bytes.ToUpper(typed)

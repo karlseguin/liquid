@@ -1,3 +1,5 @@
+**In the middle of rewriting the parser, nothing's really working**
+
 # Liquid Templates For Go
 
     template, err := liquid.ParseString("hello {{ name | upcase }}", nil)

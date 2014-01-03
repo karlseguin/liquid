@@ -26,6 +26,17 @@ func TrimStrings(values []string) []string {
 	return trimmed
 }
 
+// Since these templates are possibly long-lived, let's free up any space
+// which was accumulated while we grew these arrays
+func TrimValues(values []Value) []Value {
+	if len(values) == cap(values) {
+		return values
+	}
+	trimmed := make([]Value, len(values))
+	copy(trimmed, values)
+	return trimmed
+}
+
 // Convert arbitrary data to []byte
 func ToBytes(data interface{}) []byte {
 	switch typed := data.(type) {

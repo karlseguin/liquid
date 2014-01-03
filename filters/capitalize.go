@@ -2,15 +2,16 @@ package filters
 
 import (
 	"bytes"
+	"github.com/karlseguin/liquid/core"
 )
 
 // Creates a capitalize filter
-func CapitalizeFactory(parameters []string) Filter {
+func CapitalizeFactory(parameters []core.Value) Filter {
 	return Capitalize
 }
 
 // Capitalizes words in the input sentence
-func Capitalize(input interface{}) interface{} {
+func Capitalize(input interface{}, data map[string]interface{}) interface{} {
 	switch typed := input.(type) {
 	case string:
 		return capitalize([]byte(typed))

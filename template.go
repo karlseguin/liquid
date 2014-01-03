@@ -100,7 +100,8 @@ func extractTokens(parser *core.Parser, container core.Tag) error {
 			break
 		}
 		if markupType == core.OutputMarkup {
-			code, err := buildOutputTag(parser)
+			parser.Forward() //skip the {
+			code, err := newOutput(parser)
 			if err != nil {
 				return err
 			}

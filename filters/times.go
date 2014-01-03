@@ -2,20 +2,39 @@ package filters
 
 import (
 	"strconv"
+	"github.com/karlseguin/liquid/core"
 )
 
 // Creates a time filter
-func TimesFactory(parameters []string) Filter {
+func TimesFactory(parameters []core.Value) Filter {
 	if len(parameters) == 0 {
 		return Noop
 	}
-	if i, err := strconv.Atoi(parameters[0]); err == nil {
-		return (&IntTimesFilter{i}).Times
-	}
-	if f, err := strconv.ParseFloat(parameters[0], 64); err == nil {
-		return (&FloatTimesFilter{f}).Times
+	switch typed := parameters[0].(type) {
+	case *core.StaticIntValue:
+		return (&IntTimesFilter{typed.Value}).Times
+	case *core.StaticFloatValue:
+		return (&FloatTimesFilter{typed.Value}).Times
+	case *core.DynamicValue:
+		return (&DynamicTimesFilter{typed}).Times
 	}
 	return Noop
+}
+
+type DynamicTimesFilter struct {
+	value core.Value
+}
+
+func (t *DynamicTimesFilter) Times(input interface{}, data map[string]interface{}) interface{} {
+	resolved := t.value.Resolve(data)
+	switch typed := resolved.(type) {
+	case int:
+		return timesInt(typed, input)
+	case float64:
+		return timesFloat(typed, input)
+	default:
+		return input
+	}
 }
 
 type IntTimesFilter struct {
@@ -23,22 +42,26 @@ type IntTimesFilter struct {
 }
 
 // Multiples two numbers
-func (t *IntTimesFilter) Times(input interface{}) interface{} {
+func (t *IntTimesFilter) Times(input interface{}, data map[string]interface{}) interface{} {
+	return timesInt(t.times, input)
+}
+
+func timesInt(times int, input interface{}) interface{} {
 	switch typed := input.(type) {
 	case int:
-		return typed * t.times
+		return typed * times
 	case float64:
-		return typed * float64(t.times)
+		return typed * float64(times)
 	case uint:
-		return typed * uint(t.times)
+		return typed * uint(times)
 	case int64:
-		return typed * int64(t.times)
+		return typed * int64(times)
 	case uint64:
-		return typed * uint64(t.times)
+		return typed * uint64(times)
 	case string:
-		return stringTimesInt(typed, t.times)
+		return stringTimesInt(typed, times)
 	case []byte:
-		return stringTimesInt(string(typed), t.times)
+		return stringTimesInt(string(typed), times)
 	default:
 		return input
 	}
@@ -59,22 +82,26 @@ type FloatTimesFilter struct {
 }
 
 // Multiples two numbers
-func (t *FloatTimesFilter) Times(input interface{}) interface{} {
+func (t *FloatTimesFilter) Times(input interface{}, data map[string]interface{}) interface{} {
+	return timesFloat(t.times, input)
+}
+
+func timesFloat(times float64, input interface{}) interface{} {
 	switch typed := input.(type) {
 	case int:
-		return float64(typed) * t.times
+		return float64(typed) * times
 	case float64:
-		return typed * t.times
+		return typed * times
 	case uint:
-		return float64(typed) * t.times
+		return float64(typed) * times
 	case int64:
-		return float64(typed) * t.times
+		return float64(typed) * times
 	case uint64:
-		return float64(typed) * t.times
+		return float64(typed) * times
 	case string:
-		return stringTimesFloat(typed, t.times)
+		return stringTimesFloat(typed, times)
 	case []byte:
-		return stringTimesFloat(string(typed), t.times)
+		return stringTimesFloat(string(typed), times)
 	default:
 		return input
 	}

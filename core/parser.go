@@ -3,16 +3,17 @@ package core
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
+)
+
+var (
+	EmptyBytes = []byte{}
 )
 
 const (
 	OutputMarkup = 1
 	TagMarkup    = 2
-)
-
-var (
-	EmptyBytes = []byte{}
 )
 
 type Parser struct {
@@ -40,26 +41,22 @@ func (p *Parser) ToMarkup() ([]byte, int) {
 	start := p.Position
 	markupType := 0
 	for ; p.Position < p.Len; p.Position++ {
-		if p.Current() != '{' {
-			continue
+		if p.SkipUntil('{') != '{' {
+			break
 		}
 		next := p.Peek()
-		if next == '{' || next == '%' {
-			p.Forward()
+		if next == '{' {
 			markupType = OutputMarkup
-			if next == '%' {
-				markupType = TagMarkup
-			}
+			break
+		}
+		if next == '%' {
+			markupType = TagMarkup
 			break
 		}
 	}
 	pre := EmptyBytes
 	if p.Position > start {
-		if markupType != 0 {
-			pre = p.Data[start : p.Position-2]
-		} else {
-			pre = p.Data[start:p.Position]
-		}
+		pre = p.Data[start : p.Position]
 	}
 	p.Commit()
 	return pre, markupType
@@ -77,46 +74,67 @@ func (p *Parser) SkipSpaces() (current byte) {
 	return
 }
 
-func (p *Parser) ReadValue() (interface{}, bool, error) {
+func (p *Parser) ReadValue() (Value, error) {
 	current := p.SkipSpaces()
-	if current == 0 || current == '}' {
-		return EmptyBytes, true, nil
+	if current == 0 || current == '}' || current == '|' || current == ':' || current == '%' {
+		return nil, nil
 	}
 	if current == '\'' {
-		p.Forward()
-		static, err := p.ReadStaticValue()
-		if err != nil {
-			return nil, true, err
-		}
-		return static, true, nil
+		return p.ReadStaticStringValue()
 	}
-	return p.ReadDynamicValues(), false, nil
+	if current == '-' || (current >= '0' && current <= '9') {
+		return p.ReadStaticNumericValue()
+	}
+	return p.ReadDynamicValues()
 }
 
-func (p *Parser) ReadStaticValue() ([]byte, error) {
+func (p *Parser) ReadStaticStringValue() (Value, error) {
+	p.Forward() //consume the opening '
 	escaped := 0
+	found := false
 	start := p.Position
 	for {
-		p.SkipUntil('\'')
+		current := p.SkipUntil('\'')
 		if p.Data[p.Position-1] != '\\' {
+			if current == '\'' {
+				p.Forward()
+				found = true
+			}
 			break
 		}
 		p.Forward()
 		escaped++
 	}
 
-	if p.HasMore() == false {
-		return EmptyBytes, p.Error("Invalid output value, a single quote might be missing", start)
+	if found == false {
+		return nil, p.Error("Invalid value, a single quote might be missing", start)
 	}
-	p.Forward()
 	p.Commit()
+	var data []byte
 	if escaped > 0 {
-		return unescape(p.Data[start:p.Position-1], escaped), nil
+		data = unescape(p.Data[start:p.Position-1], escaped)
+	} else {
+		data = detatch(p.Data[start : p.Position-1])
 	}
-	return detatch(p.Data[start : p.Position-1]), nil
+	return &StaticStringValue{data}, nil
 }
 
-func (p *Parser) ReadDynamicValues() []string {
+func (p *Parser) ReadStaticNumericValue() (Value, error) {
+	start := p.Position
+	name := p.ReadName()
+	if len(name) == 0 {
+		return nil, p.Error("Was expecting a value, got nothing", start)
+	}
+	if i, err := strconv.Atoi(name); err == nil {
+		return &StaticIntValue{i}, nil
+	}
+	if f, err := strconv.ParseFloat(name, 64); err == nil {
+		return &StaticFloatValue{f}, nil
+	}
+	return nil, p.Error("Invalid value. This is either an invalid number, variable name, or maybe you're missing a quote", start)
+}
+
+func (p *Parser) ReadDynamicValues() (Value, error) {
 	values := make([]string, 0, 5)
 	marker := p.Position
 	for ; p.Position < p.Len; p.Position++ {
@@ -130,7 +148,7 @@ func (p *Parser) ReadDynamicValues() []string {
 		}
 	}
 	p.Commit()
-	return TrimStrings(values)
+	return &DynamicValue{TrimStrings(values)}, nil
 }
 
 func (p *Parser) ReadName() string {
@@ -139,13 +157,34 @@ func (p *Parser) ReadName() string {
 	marker := p.Position
 	for ; p.Position < p.Len; p.Position++ {
 		current := p.Current()
-		if current == ' ' || current == '|' || current == '}' || current == '%' || current == ':' {
+		if current == ' ' || current == '|' || current == '}' || current == '%' || current == ':' || current == ',' {
 			name = string(p.Data[marker:p.Position])
 			break
 		}
 	}
 	p.Commit()
 	return name
+}
+
+func (p *Parser) ReadParameters() ([]Value, error) {
+	values := make([]Value, 0, 3)
+	for {
+		value, err := p.ReadValue()
+		if err != nil {
+			return nil, err
+		}
+		if value == nil {
+			break
+		}
+		values = append(values, value)
+		if p.SkipSpaces() == ',' {
+			p.Forward()
+			continue
+		}
+		break
+	}
+	p.Commit()
+	return TrimValues(values), nil
 }
 
 func (p *Parser) Peek() byte {
@@ -172,7 +211,11 @@ func (p *Parser) Commit() {
 }
 
 func (p *Parser) Forward() {
-	p.Position++
+	p.ForwardBy(1)
+}
+
+func (p *Parser) ForwardBy(count int) {
+	p.Position += count
 }
 
 func (p *Parser) SkipUntil(b byte) (current byte) {
@@ -200,6 +243,10 @@ func (p *Parser) Snapshot(start int) []byte {
 		end = p.Len
 	}
 	return p.Data[start:end]
+}
+
+func (p *Parser) out() {
+	fmt.Println(string(p.Data[p.Position:]))
 }
 
 func unescape(data []byte, escaped int) []byte {
