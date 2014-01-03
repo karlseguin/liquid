@@ -79,8 +79,8 @@ func (p *Parser) ReadValue() (Value, error) {
 	if current == 0 || current == '}' || current == '|' || current == ':' || current == '%' {
 		return nil, nil
 	}
-	if current == '\'' {
-		return p.ReadStaticStringValue()
+	if current == '\'' || current == '"' {
+		return p.ReadStaticStringValue(current)
 	}
 	if current == '-' || (current >= '0' && current <= '9') {
 		return p.ReadStaticNumericValue()
@@ -88,15 +88,15 @@ func (p *Parser) ReadValue() (Value, error) {
 	return p.ReadDynamicValues()
 }
 
-func (p *Parser) ReadStaticStringValue() (Value, error) {
+func (p *Parser) ReadStaticStringValue(delimiter byte) (Value, error) {
 	p.Forward() //consume the opening '
 	escaped := 0
 	found := false
 	start := p.Position
 	for {
-		current := p.SkipUntil('\'')
+		current := p.SkipUntil(delimiter)
 		if p.Data[p.Position-1] != '\\' {
-			if current == '\'' {
+			if current == delimiter {
 				p.Forward()
 				found = true
 			}

@@ -68,11 +68,20 @@ func TestParserParsesAnEmptyValue2(t *testing.T) {
 
 func TestParserParsesAStaticValue(t *testing.T) {
 	spec := gspec.New(t)
-	parser := newParser(" 'hello' ")
+	parser := newParser(` 'hel"lo' `)
 	value, err := parser.ReadValue()
 	spec.Expect(err).ToBeNil()
-	spec.Expect(string(value.Resolve(nil).([]byte))).ToEqual("hello")
-	spec.Expect(parser.Position).ToEqual(8)
+	spec.Expect(string(value.Resolve(nil).([]byte))).ToEqual(`hel"lo`)
+	spec.Expect(parser.Position).ToEqual(9)
+}
+
+func TestParserParsesAStaticValueWithDoubleQuotes(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser(` "hello'" `)
+	value, err := parser.ReadValue()
+	spec.Expect(err).ToBeNil()
+	spec.Expect(string(value.Resolve(nil).([]byte))).ToEqual("hello'")
+	spec.Expect(parser.Position).ToEqual(9)
 }
 
 func TestParserParsesAnInteger(t *testing.T) {
