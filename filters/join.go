@@ -22,7 +22,6 @@ type JoinFilter struct {
 
 // join elements of the array with certain character between them
 func (f *JoinFilter) Join(input interface{}, data map[string]interface{}) interface{} {
-
 	value := reflect.ValueOf(input)
 	kind := value.Kind()
 	if kind != reflect.Array && kind != reflect.Slice {
