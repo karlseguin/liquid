@@ -59,3 +59,13 @@ func ToBytes(data interface{}) []byte {
 	}
 	return []byte(fmt.Sprintf("%v", data))
 }
+
+// Convert arbitrary data to string
+func ToString(data interface{}) string {
+	switch typed := data.(type) {
+	case string:
+		return typed
+	default:
+		return string(ToBytes(data))
+	}
+}

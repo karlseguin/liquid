@@ -22,7 +22,6 @@ The following filters are missing:
 - strip_html
 - truncate
 - truncatewords
-- split
 - modulo
 
 The following tags are missing (all):
