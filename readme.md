@@ -36,7 +36,7 @@ Other:
 - Render can generate far less objects
 
 ## Template Cache
-By default the templates are cached in a pretty dumb cache based. That is, once in the cache, items stay in the cache (there's no expiry). The cache can be disabled, on a per-template basis, via:
+By default the templates are cached in a pretty dumb cache. That is, once in the cache, items stay in the cache (there's no expiry). The cache can be disabled, on a per-template basis, via:
 
     template, _ := liquid.Parse(someByteTemplate, liquid.Configure().Cache(nil))
     //OR
@@ -84,21 +84,22 @@ It's best to look at the existing filters for ideas on how to proceed. Briefly, 
     func UpcaseFactory(parameters []string) Filter {
       return Upcase
     }
-    func Upcase(input interface{}) interface{} {
+    func Upcase(input interface{}, data map[string]interface{}) interface{} {
       //todo
     }
 
 For filters that expect parameters, a little more work is needed:
 
-    func JoinFactory(parameters []string) Filter {
-      return &JoinFilter{
-        glue: []byte(parameters[0]),
+    func JoinFactory(parameters []core.Value) Filter {
+      if len(parameters) == 0 {
+        return defaultJoin.Join
       }
+      return (&JoinFilter{parameters[0]}).Join
     }
     type JoinFilter struct {
-      glue []byte
+      glue core.Value
     }
-    func (f *JoinFilter) Join(input interface{}) interface{} {
+    func (f *JoinFilter) Join(input interface{}, data map[string]interface{}) interface{} {
 
     }
 
