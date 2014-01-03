@@ -20,8 +20,12 @@ func PlusFactory(parameters []core.Value) Filter {
 		return (&FloatPlusFilter{typed.Value}).Plus
 	case *core.DynamicValue:
 		return (&DynamicPlusFilter{typed}).Plus
+	default:
+		if n, ok := core.ToInt(parameters[0].Underlying()); ok {
+			return (&IntPlusFilter{n}).Plus
+		}
+		return Noop
 	}
-	return Noop
 }
 
 type DynamicPlusFilter struct {

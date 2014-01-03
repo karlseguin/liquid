@@ -17,8 +17,12 @@ func TimesFactory(parameters []core.Value) Filter {
 		return (&FloatTimesFilter{typed.Value}).Times
 	case *core.DynamicValue:
 		return (&DynamicTimesFilter{typed}).Times
+	default:
+		if n, ok := core.ToInt(parameters[0].Underlying()); ok {
+			return (&IntTimesFilter{n}).Times
+		}
+		return Noop
 	}
-	return Noop
 }
 
 type DynamicTimesFilter struct {

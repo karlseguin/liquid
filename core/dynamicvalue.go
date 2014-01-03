@@ -20,3 +20,7 @@ func (v *DynamicValue) Resolve(data map[string]interface{}) interface{} {
 
 	return ResolveFinal(d)
 }
+
+func (v *DynamicValue) Underlying() interface{} {
+	return nil
+}

@@ -12,6 +12,12 @@ func TestModuloAnIntToAnInt(t *testing.T) {
 	spec.Expect(filter(43, nil).(int)).ToEqual(3)
 }
 
+func TestModuloAnFloatToAnInt(t *testing.T) {
+	spec := gspec.New(t)
+	filter := ModuloFactory([]core.Value{floatValue(5.2)})
+	spec.Expect(filter(43, nil).(int)).ToEqual(3)
+}
+
 func TestModuloAnIntToAStringAsAnInt(t *testing.T) {
 	spec := gspec.New(t)
 	filter := ModuloFactory([]core.Value{intValue(7)})

@@ -15,8 +15,12 @@ func ModuloFactory(parameters []core.Value) Filter {
 		return (&IntModuloFilter{typed.Value}).Mod
 	case *core.DynamicValue:
 		return (&DynamicModuloFilter{typed}).Mod
+	default:
+		if n, ok := core.ToInt(parameters[0].Underlying()); ok {
+			return (&IntModuloFilter{int(n)}).Mod
+		}
+		return Noop
 	}
-	return Noop
 }
 
 type DynamicModuloFilter struct {
@@ -24,13 +28,10 @@ type DynamicModuloFilter struct {
 }
 
 func (m *DynamicModuloFilter) Mod(input interface{}, data map[string]interface{}) interface{} {
-	resolved := m.value.Resolve(data)
-	switch typed := resolved.(type) {
-	case int:
-		return modInt(typed, input)
-	default:
-		return input
+	if n, ok := core.ToInt(m.value.Resolve(data)); ok {
+		return modInt(n, input)
 	}
+	return input
 }
 
 // Plus filter for integer parameter

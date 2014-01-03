@@ -15,8 +15,12 @@ func DivideByFactory(parameters []core.Value) Filter {
 		return (&FloatTimesFilter{1 / typed.Value}).Times
 	case *core.DynamicValue:
 		return (&DynamicDivideByFilter{typed}).DivideBy
+	default:
+		if n, ok := core.ToInt(parameters[0].Underlying()); ok {
+			return (&FloatTimesFilter{1 / float64(n)}).Times
+		}
+		return Noop
 	}
-	return Noop
 }
 
 type DynamicDivideByFilter struct {

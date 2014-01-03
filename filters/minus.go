@@ -18,8 +18,12 @@ func MinusFactory(parameters []core.Value) Filter {
 		return (&FloatPlusFilter{-typed.Value}).Plus
 	case *core.DynamicValue:
 		return (&DynamicMinusFilter{typed}).Minus
+	default:
+		if n, ok := core.ToInt(parameters[0].Underlying()); ok {
+			return (&IntPlusFilter{-n}).Plus
+		}
+		return Noop
 	}
-	return Noop
 }
 
 type DynamicMinusFilter struct {
