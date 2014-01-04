@@ -1,11 +1,10 @@
 package tags
 
 import (
-	"testing"
 	"github.com/karlseguin/gspec"
 	"github.com/karlseguin/liquid/core"
+	"testing"
 )
-
 
 func TestCommentFactoryForNormalComment(t *testing.T) {
 	spec := gspec.New(t)

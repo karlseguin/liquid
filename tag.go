@@ -11,6 +11,8 @@ type TagFactory func(*core.Parser) (core.Tag, error)
 var Tags = map[string]TagFactory{
 	"comment":    tags.CommentFactory,
 	"endcomment": tags.EndCommentFactory,
+	"raw":        tags.RawFactory,
+	"endraw":     tags.EndRawFactory,
 }
 
 func newTag(p *core.Parser) (core.Tag, error) {

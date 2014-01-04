@@ -25,7 +25,6 @@ The following tags are missing (all):
 - for
 - if
 - include
-- raw
 - unless
 
 Other:

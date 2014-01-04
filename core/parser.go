@@ -65,6 +65,16 @@ func (p *Parser) ToMarkup() ([]byte, MarkupType) {
 	return pre, markupType
 }
 
+func (p *Parser) SkipPastTag() {
+	for p.HasMore() {
+		p.SkipUntil('}')
+		p.Forward()
+		if p.Data[p.Position-2] == '%' {
+			return
+		}
+	}
+}
+
 func (p *Parser) SkipSpaces() (current byte) {
 	for ; p.Position < p.Len; p.Position++ {
 		c := p.Current()

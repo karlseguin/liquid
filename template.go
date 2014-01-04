@@ -123,6 +123,8 @@ func extractTokens(parser *core.Parser, container core.Tag) error {
 				if err := container.AddSibling(tag); err != nil {
 					return err
 				}
+			case core.RawTag:
+				container.AddCode(tag)
 			}
 		} else {
 			break

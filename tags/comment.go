@@ -19,13 +19,13 @@ func CommentFactory(p *core.Parser) (core.Tag, error) {
 			} else if name == "endcomment" {
 				openTags--
 				if openTags == 0 {
-					p.SkipUntil('}')
-					p.Forward()
+					p.SkipPastTag()
 					break
 				}
 			}
 		} else if markupType == core.OutputMarkup {
-			p.ForwardBy(2) // skip it
+
+			p.SkipPastTag()
 		} else {
 			break
 		}
@@ -60,5 +60,5 @@ func (c *Comment) Name() string {
 }
 
 func (c *Comment) Type() core.TagType {
-	return core.Noop
+	return core.NoopTag
 }
