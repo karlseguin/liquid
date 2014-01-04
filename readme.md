@@ -1,5 +1,3 @@
-**Parser rewrite. Tag support is completely gone**
-
 # Liquid Templates For Go
 
     template, err := liquid.ParseString("hello {{ name | upcase }}", nil)
@@ -16,7 +14,7 @@ The following filters are missing:
 
 - map
 
-The following tags are missing (all):
+The following tags are missing:
 
 - case
 - cycle
