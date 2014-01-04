@@ -18,7 +18,6 @@ The following filters are missing:
 
 The following tags are missing (all):
 
-- capture
 - case
 - cycle
 - for
@@ -73,11 +72,11 @@ Failing this, `fmt.Sprintf("%v")` is used to generate a value. At this point, it
 
 
 ## Filters
-You can add custom filters by writing in to the `liquid.Filters` map. **This map is not thread safe; it is expected that you'll add filters on init and then leave it alone**.
+You can add custom filters by calling `core.RegisterFilter`. **The filter lookup is not thread safe; it is expected that you'll add filters on init and then leave it alone**.
 
 It's best to look at the existing filters for ideas on how to proceed. Briefly, there are two types of filters: those with parameters and those without. To support both from a single interface, each filter has a factory. For filters without parameters, the factory is simple:
 
-    func UpcaseFactory(parameters []string) Filter {
+    func UpcaseFactory(parameters []string) core.Filter {
       return Upcase
     }
     func Upcase(input interface{}, data map[string]interface{}) interface{} {
@@ -86,7 +85,7 @@ It's best to look at the existing filters for ideas on how to proceed. Briefly, 
 
 For filters that expect parameters, a little more work is needed:
 
-    func JoinFactory(parameters []core.Value) Filter {
+    func JoinFactory(parameters []core.Value) core.Filter {
       if len(parameters) == 0 {
         return defaultJoin.Join
       }
