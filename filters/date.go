@@ -1,36 +1,14 @@
 package filters
 
 import (
+	"fmt"
 	"github.com/karlseguin/liquid/core"
-	"strconv"
-	"sync"
 	"time"
 )
 
 var (
-	now                 = func() time.Time { return time.Now() }
-	zeroTime            = time.Time{}
-	timeFormatCache     = make(map[string]string)
-	timeFormatCacheLock sync.RWMutex
-	timePartLookup      = map[byte]string{
-		'a': "Mon",
-		'A': "Monday",
-		'b': "Jan",
-		'B': "January",
-		'c': "ANSIC", //fail
-		'd': "02",
-		'H': "15",
-		'I': "03",
-		'm': "01",
-		'M': "04",
-		'p': "PM",
-		'S': "05",
-		'x': "Mon Jan 02",
-		'X': "15:04:05",
-		'y': "06",
-		'Y': "2006",
-		'Z': "MST",
-	}
+	now      = func() time.Time { return time.Now() }
+	zeroTime = time.Time{}
 )
 
 // Creates an date filter
@@ -50,8 +28,7 @@ func (d *DateFilter) ToString(input interface{}, data map[string]interface{}) in
 	if ok == false {
 		return input
 	}
-	format := alignFormat(time, core.ToString(d.format.Resolve(data)))
-	return time.Format(format)
+	return formatTime(time, core.ToString(d.format.Resolve(data)))
 }
 
 func inputToTime(input interface{}) (time.Time, bool) {
@@ -80,25 +57,9 @@ func timeFromString(s string) (time.Time, bool) {
 	return t, true
 }
 
-func alignFormat(t time.Time, ruby string) string {
-	timeFormatCacheLock.RLock()
-	format, exists := timeFormatCache[ruby]
-	timeFormatCacheLock.RUnlock()
-	if exists == false {
-		format = buildTimeFormat(t, ruby)
-		timeFormatCacheLock.Lock()
-		defer timeFormatCacheLock.Unlock()
-		if len(timeFormatCache) > 500 {
-			timeFormatCache = make(map[string]string)
-		}
-		timeFormatCache[ruby] = format
-	}
-	return format
-}
-
-func buildTimeFormat(t time.Time, ruby string) string {
+func formatTime(t time.Time, ruby string) string {
 	l := len(ruby) - 1
-	format := make([]byte, 0, l*5)
+	format := make([]byte, 0, l*2)
 	for i := 0; i < l; i++ {
 		if ruby[i] != '%' {
 			format = append(format, ruby[i])
@@ -108,28 +69,69 @@ func buildTimeFormat(t time.Time, ruby string) string {
 		if n == '%' {
 			format = append(format, '%')
 		} else {
-			alt, ok := timePartLookup[n]
-			if ok == false {
-				alt, ok = timePartCalculate(t, n)
-			}
-			if ok {
-				b := []byte(alt)
-				for j := 0; j < len(b); j++ {
-					format = append(format, b[j])
-				}
-			}
+			format = append(format, convertTimeFormat(t, n)...)
 		}
 		i += 1
 	}
 	return string(format)
 }
 
-func timePartCalculate(t time.Time, n byte) (string, bool) {
+func convertTimeFormat(t time.Time, n byte) string {
 	switch n {
+	case 'a':
+		return t.Weekday().String()[:3]
+	case 'A':
+		return t.Weekday().String()
+	case 'b':
+		return t.Month().String()[:3]
+	case 'B':
+		return t.Month().String()
+	case 'c':
+		return t.Format("ANSIC")
+	case 'd':
+		return fmt.Sprintf("%02d", t.Day())
+	case 'H':
+		return fmt.Sprintf("%02d", t.Hour())
+	case 'I':
+		hr := t.Hour() % 12
+		if hr == 0 {
+			hr = 12
+		}
+		return fmt.Sprintf("%02d", hr)
+	case 'm':
+		return fmt.Sprintf("%02d", t.Month())
+	case 'M':
+		return fmt.Sprintf("%02d", t.Minute())
+	case 'p':
+		if t.Hour() > 11 {
+			return "PM"
+		}
+		return "AM"
+	case 'S':
+		return fmt.Sprintf("%02d", t.Second())
+	case 'x':
+		return t.Format("Mon Jan 02")
+	case 'X':
+		return t.Format("15:04:05")
+	case 'y':
+		year := fmt.Sprintf("%04d", t.Year())
+		if l := len(year); l > 2 {
+			return year[l-2 : l]
+		}
+		return year
+	case 'Y':
+		return fmt.Sprintf("%04d", t.Year())
 	case 'j':
-		return strconv.Itoa(t.YearDay()), true
+		return fmt.Sprintf("%02d", t.YearDay())
 	case 'w':
-		return strconv.Itoa(int(t.Weekday())), true
+		return fmt.Sprintf("%02d", t.Weekday())
+	case 'U':
+		_, w := t.ISOWeek()
+		return fmt.Sprintf("%02d", w)
+	case 'W':
+		_, w := t.ISOWeek()
+		return fmt.Sprintf("%02d", w)
+	default:
+		return string(n)
 	}
-	return "", false
 }

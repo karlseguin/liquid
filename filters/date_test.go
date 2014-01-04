@@ -26,8 +26,8 @@ func TestDateTodayWithBasicFormat(t *testing.T) {
 	spec.Expect(filter("today", nil).(string)).ToEqual("15:04:05%")
 }
 
-func TestParsedDateWithSillyFormat(t *testing.T) {
+func TestDateWithSillyFormat(t *testing.T) {
 	spec := gspec.New(t)
 	filter := DateFactory([]core.Value{stringValue("%w  %U  %j")})
-	spec.Expect(filter("2014-01-10 21:31:28 +0800", nil).(string)).ToEqual("5  2  10")
+	spec.Expect(filter("2014-01-10 21:31:28 +0800", nil).(string)).ToEqual("05  02  10")
 }
