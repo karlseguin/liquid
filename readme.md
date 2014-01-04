@@ -21,7 +21,6 @@ The following tags are missing (all):
 - assign
 - capture
 - case
-- comment
 - cycle
 - for
 - if

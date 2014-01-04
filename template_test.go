@@ -18,7 +18,7 @@ func TestRendersOutputTags(t *testing.T) {
 		"name":   "leto atreides",
 		"colors": []string{"brown", "blue"},
 	}
-	template, _ := ParseString("hello {{ name | capitalize }}, you ranked {{ colors | first }} as your favorite color", nil)
+	template, _ := ParseString("hello {{name | capitalize }}, you ranked {{ colors | first }} as your favorite color", nil)
 	spec.Expect(string(template.Render(d))).ToEqual(`hello Leto Atreides, you ranked brown as your favorite color`)
 }
 

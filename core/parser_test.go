@@ -9,7 +9,7 @@ func TestParserToMarkupWhenTheresNoMarkup(t *testing.T) {
 	spec := gspec.New(t)
 	parser := newParser("hello world")
 	pre, mt := parser.ToMarkup()
-	spec.Expect(mt).ToEqual(0)
+	spec.Expect(mt).ToEqual(NoMarkup)
 	spec.Expect(string(pre)).ToEqual("hello world")
 	spec.Expect(parser.HasMore()).ToEqual(false)
 }

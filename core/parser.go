@@ -11,9 +11,12 @@ var (
 	EmptyBytes = []byte{}
 )
 
+type MarkupType int
+
 const (
-	OutputMarkup = 1
-	TagMarkup    = 2
+	OutputMarkup MarkupType = iota
+	TagMarkup
+	NoMarkup
 )
 
 type Parser struct {
@@ -37,9 +40,9 @@ func NewParser(data []byte) *Parser {
 	return parser
 }
 
-func (p *Parser) ToMarkup() ([]byte, int) {
+func (p *Parser) ToMarkup() ([]byte, MarkupType) {
 	start := p.Position
-	markupType := 0
+	markupType := NoMarkup
 	for ; p.Position < p.Len; p.Position++ {
 		if p.SkipUntil('{') != '{' {
 			break
@@ -234,18 +237,18 @@ func (p *Parser) Error(s string, start int) error {
 }
 
 func (p *Parser) Snapshot(start int) []byte {
-	start = start - 20
+	start = start - 5
 	if start < 0 {
 		start = 0
 	}
-	end := start + 50
+	end := start + 20
 	if end > p.Len {
 		end = p.Len
 	}
 	return p.Data[start:end]
 }
 
-func (p *Parser) out() {
+func (p *Parser) Out() {
 	fmt.Println(string(p.Data[p.Position:]))
 }
 

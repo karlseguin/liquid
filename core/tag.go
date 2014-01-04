@@ -4,8 +4,18 @@ package core
 // interface for an tag markup
 type Tag interface {
 	AddCode(code Code)
-	AddTag(tag Tag) (bool, bool)
+	AddSibling(tag Tag) error
 	Name() string
-	IsEnd() bool
+	Type() TagType
 	Code
 }
+
+// The type of tag
+type TagType int
+
+const (
+	ContainerTag TagType = iota
+	EndTag
+	SiblingTag
+	Noop
+)
