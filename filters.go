@@ -5,41 +5,36 @@ import (
 	"github.com/karlseguin/liquid/filters"
 )
 
-// A filter factory creates a filter based on the supplied parameters
-type FilterFactory func(parameters []core.Value) filters.Filter
-
-// A map of filters. You can register custom filters by adding them to this
-// map. Note however that the map isn't thread-safe.
-var Filters = map[string]FilterFactory{
-	"capitalize":     filters.CapitalizeFactory,
-	"downcase":       filters.DowncaseFactory,
-	"upcase":         filters.UpcaseFactory,
-	"first":          filters.FirstFactory,
-	"last":           filters.LastFactory,
-	"join":           filters.JoinFactory,
-	"debug":          filters.DebugFactory,
-	"plus":           filters.PlusFactory,
-	"minus":          filters.MinusFactory,
-	"size":           filters.SizeFactory,
-	"times":          filters.TimesFactory,
-	"divideby":       filters.DivideByFactory,
-	"prepend":        filters.PrependFactory,
-	"append":         filters.AppendFactory,
-	"strip_newlines": filters.StripNewLinesFactory,
-	"strip_html":     filters.StripHtmlFactory,
-	"replace":        filters.ReplaceFactory,
-	"replace_first":  filters.ReplaceFirstFactory,
-	"remove":         filters.RemoveFactory,
-	"remove_first":   filters.RemoveFirstFactory,
-	"newline_to_br":  filters.NewLineToBrFactory,
-	"split":          filters.SplitFactory,
-	"modulo":         filters.ModuloFactory,
-	"truncate":       filters.TruncateFactory,
-	"truncatewords":  filters.TruncateWordsFactory,
-	"escape":         filters.EscapeFactory,
-	"escape_once":    filters.EscapeOnceFactory,
-	"sort":           filters.SortFactory,
-	"default":        filters.DefaultFactory,
-	"reverse":        filters.ReverseFactory,
-	"date":           filters.DateFactory,
+func init() {
+	core.RegisterFilter("capitalize", filters.CapitalizeFactory)
+	core.RegisterFilter("downcase", filters.DowncaseFactory)
+	core.RegisterFilter("upcase", filters.UpcaseFactory)
+	core.RegisterFilter("first", filters.FirstFactory)
+	core.RegisterFilter("last", filters.LastFactory)
+	core.RegisterFilter("join", filters.JoinFactory)
+	core.RegisterFilter("debug", filters.DebugFactory)
+	core.RegisterFilter("plus", filters.PlusFactory)
+	core.RegisterFilter("minus", filters.MinusFactory)
+	core.RegisterFilter("size", filters.SizeFactory)
+	core.RegisterFilter("times", filters.TimesFactory)
+	core.RegisterFilter("divideby", filters.DivideByFactory)
+	core.RegisterFilter("prepend", filters.PrependFactory)
+	core.RegisterFilter("append", filters.AppendFactory)
+	core.RegisterFilter("strip_newlines", filters.StripNewLinesFactory)
+	core.RegisterFilter("strip_html", filters.StripHtmlFactory)
+	core.RegisterFilter("replace", filters.ReplaceFactory)
+	core.RegisterFilter("replace_first", filters.ReplaceFirstFactory)
+	core.RegisterFilter("remove", filters.RemoveFactory)
+	core.RegisterFilter("remove_first", filters.RemoveFirstFactory)
+	core.RegisterFilter("newline_to_br", filters.NewLineToBrFactory)
+	core.RegisterFilter("split", filters.SplitFactory)
+	core.RegisterFilter("modulo", filters.ModuloFactory)
+	core.RegisterFilter("truncate", filters.TruncateFactory)
+	core.RegisterFilter("truncatewords", filters.TruncateWordsFactory)
+	core.RegisterFilter("escape", filters.EscapeFactory)
+	core.RegisterFilter("escape_once", filters.EscapeOnceFactory)
+	core.RegisterFilter("sort", filters.SortFactory)
+	core.RegisterFilter("default", filters.DefaultFactory)
+	core.RegisterFilter("reverse", filters.ReverseFactory)
+	core.RegisterFilter("date", filters.DateFactory)
 }

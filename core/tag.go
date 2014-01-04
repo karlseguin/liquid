@@ -17,6 +17,6 @@ const (
 	ContainerTag TagType = iota
 	EndTag
 	SiblingTag
-	RawTag
+	StandaloneTag
 	NoopTag
 )

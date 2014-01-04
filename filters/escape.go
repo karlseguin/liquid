@@ -6,7 +6,7 @@ import (
 )
 
 // Creates an escape filter
-func EscapeFactory(parameters []core.Value) Filter {
+func EscapeFactory(parameters []core.Value) core.Filter {
 	return Escape
 }
 

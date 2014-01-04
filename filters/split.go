@@ -8,7 +8,7 @@ import (
 var defaultSplit = (&SplitFilter{&core.StaticStringValue{[]byte(" ")}}).Split
 
 // Creates a join filter
-func SplitFactory(parameters []core.Value) Filter {
+func SplitFactory(parameters []core.Value) core.Filter {
 	if len(parameters) == 0 {
 		return defaultSplit
 	}

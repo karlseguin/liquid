@@ -13,6 +13,7 @@ var Tags = map[string]TagFactory{
 	"endcomment": tags.EndCommentFactory,
 	"raw":        tags.RawFactory,
 	"endraw":     tags.EndRawFactory,
+	"assign":     tags.AssignFactory,
 }
 
 func newTag(p *core.Parser) (core.Tag, error) {

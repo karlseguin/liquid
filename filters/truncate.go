@@ -11,7 +11,7 @@ var (
 )
 
 // Creates an truncate filter
-func TruncateFactory(parameters []core.Value) Filter {
+func TruncateFactory(parameters []core.Value) core.Filter {
 	switch len(parameters) {
 	case 0:
 		return defaultTruncate

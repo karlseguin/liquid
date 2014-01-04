@@ -6,7 +6,7 @@ import (
 )
 
 // Creates a last filter
-func LastFactory(parameters []core.Value) Filter {
+func LastFactory(parameters []core.Value) core.Filter {
 	return Last
 }
 

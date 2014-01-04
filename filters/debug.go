@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func DebugFactory(parameter []core.Value) Filter {
+func DebugFactory(parameter []core.Value) core.Filter {
 	debug := &DebugFilter{parameter}
 	return debug.Debug
 }

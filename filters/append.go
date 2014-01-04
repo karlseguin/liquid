@@ -5,7 +5,7 @@ import (
 )
 
 // Creates an append filter
-func AppendFactory(parameters []core.Value) Filter {
+func AppendFactory(parameters []core.Value) core.Filter {
 	if len(parameters) == 0 {
 		return Noop
 	}

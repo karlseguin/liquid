@@ -57,5 +57,5 @@ func (r *Raw) Name() string {
 }
 
 func (r *Raw) Type() core.TagType {
-	return core.RawTag
+	return core.StandaloneTag
 }

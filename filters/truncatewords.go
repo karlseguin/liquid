@@ -10,7 +10,7 @@ var (
 )
 
 // Creates an truncatewords filter
-func TruncateWordsFactory(parameters []core.Value) Filter {
+func TruncateWordsFactory(parameters []core.Value) core.Filter {
 	switch len(parameters) {
 	case 0:
 		return defaultTruncateWords

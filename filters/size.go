@@ -6,7 +6,7 @@ import (
 )
 
 // Creates a size filter
-func SizeFactory(parameters []core.Value) Filter {
+func SizeFactory(parameters []core.Value) core.Filter {
 	return Size
 }
 

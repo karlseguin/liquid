@@ -7,7 +7,7 @@ import (
 )
 
 // Creates a downcase filter
-func DowncaseFactory(parameters []core.Value) Filter {
+func DowncaseFactory(parameters []core.Value) core.Filter {
 	return Downcase
 }
 

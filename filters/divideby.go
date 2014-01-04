@@ -4,7 +4,7 @@ import (
 	"github.com/karlseguin/liquid/core"
 )
 
-func DivideByFactory(parameters []core.Value) Filter {
+func DivideByFactory(parameters []core.Value) core.Filter {
 	if len(parameters) == 0 {
 		return Noop
 	}

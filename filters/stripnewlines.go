@@ -7,6 +7,6 @@ import (
 
 var stripNewLines = &ReplacePattern{regexp.MustCompile("(\n|\r)"), ""}
 
-func StripNewLinesFactory(parameters []core.Value) Filter {
+func StripNewLinesFactory(parameters []core.Value) core.Filter {
 	return stripNewLines.Replace
 }

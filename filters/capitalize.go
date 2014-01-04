@@ -6,7 +6,7 @@ import (
 )
 
 // Creates a capitalize filter
-func CapitalizeFactory(parameters []core.Value) Filter {
+func CapitalizeFactory(parameters []core.Value) core.Filter {
 	return Capitalize
 }
 

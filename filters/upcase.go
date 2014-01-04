@@ -7,7 +7,7 @@ import (
 )
 
 // Creates a upcase filter
-func UpcaseFactory(parameters []core.Value) Filter {
+func UpcaseFactory(parameters []core.Value) core.Filter {
 	return Upcase
 }
 

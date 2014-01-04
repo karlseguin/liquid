@@ -75,6 +75,16 @@ func (p *Parser) SkipPastTag() {
 	}
 }
 
+func (p *Parser) SkipPastOutput() {
+	for p.HasMore() {
+		p.SkipUntil('}')
+		p.Forward()
+		if p.Data[p.Position-2] == '}' {
+			return
+		}
+	}
+}
+
 func (p *Parser) SkipSpaces() (current byte) {
 	for ; p.Position < p.Len; p.Position++ {
 		c := p.Current()
@@ -198,6 +208,39 @@ func (p *Parser) ReadParameters() ([]Value, error) {
 	}
 	p.Commit()
 	return TrimValues(values), nil
+}
+
+func (p *Parser) ReadFilters() ([]Filter, error) {
+	var filters []Filter
+	if p.SkipSpaces() != '|' {
+		return filters, nil
+	}
+	p.Forward()
+	start := p.Position
+	filters = make([]Filter, 0, 5)
+	for name := p.ReadName(); name != ""; name = p.ReadName() {
+		factory, exists := FilterLookup[name]
+		if exists == false {
+			return nil, p.Error(fmt.Sprintf("Unknown filter %q", name), start)
+		}
+		var parameters []Value
+		if p.SkipSpaces() == ':' {
+			p.Forward()
+			var err error
+			parameters, err = p.ReadParameters()
+			if err != nil {
+				return nil, err
+			}
+		}
+		filters = append(filters, factory(parameters))
+		if p.SkipSpaces() == '|' {
+			p.Forward()
+			continue
+		}
+		break
+	}
+	p.Commit()
+	return filters, nil
 }
 
 func (p *Parser) Peek() byte {

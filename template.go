@@ -71,6 +71,9 @@ func ParseFile(path string, config *Configuration) (*Template, error) {
 }
 
 func (t *Template) Render(data map[string]interface{}) []byte {
+	if data == nil {
+		data = make(map[string]interface{})
+	}
 	buffer := new(bytes.Buffer)
 	for _, code := range t.Code {
 		buffer.Write(code.Render(data))
@@ -123,7 +126,7 @@ func extractTokens(parser *core.Parser, container core.Tag) error {
 				if err := container.AddSibling(tag); err != nil {
 					return err
 				}
-			case core.RawTag:
+			case core.StandaloneTag:
 				container.AddCode(tag)
 			}
 		} else {

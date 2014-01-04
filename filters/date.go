@@ -12,7 +12,7 @@ var (
 )
 
 // Creates an date filter
-func DateFactory(parameters []core.Value) Filter {
+func DateFactory(parameters []core.Value) core.Filter {
 	if len(parameters) == 0 {
 		return Noop
 	}

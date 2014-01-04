@@ -4,7 +4,7 @@ import (
 	"github.com/karlseguin/liquid/core"
 )
 
-func RemoveFactory(parameters []core.Value) Filter {
+func RemoveFactory(parameters []core.Value) core.Filter {
 	if len(parameters) != 1 {
 		return Noop
 	}

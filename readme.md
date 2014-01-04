@@ -18,7 +18,6 @@ The following filters are missing:
 
 The following tags are missing (all):
 
-- assign
 - capture
 - case
 - cycle

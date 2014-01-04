@@ -9,7 +9,7 @@ import (
 var defaultJoin = (&JoinFilter{&core.StaticStringValue{[]byte(" ")}}).Join
 
 // Creates a join filter
-func JoinFactory(parameters []core.Value) Filter {
+func JoinFactory(parameters []core.Value) core.Filter {
 	if len(parameters) == 0 {
 		return defaultJoin
 	}

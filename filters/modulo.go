@@ -6,7 +6,7 @@ import (
 )
 
 // Creates a plus filter
-func ModuloFactory(parameters []core.Value) Filter {
+func ModuloFactory(parameters []core.Value) core.Filter {
 	if len(parameters) == 0 {
 		return Noop
 	}

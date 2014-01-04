@@ -6,7 +6,7 @@ import (
 )
 
 // Creates a first filter
-func FirstFactory(parameters []core.Value) Filter {
+func FirstFactory(parameters []core.Value) core.Filter {
 	return First
 }
 

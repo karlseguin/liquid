@@ -8,7 +8,7 @@ import (
 var defaultDefaultFilter = (&DefaultFilter{EmptyValue}).Default
 
 // Creates a default filter
-func DefaultFactory(parameters []core.Value) Filter {
+func DefaultFactory(parameters []core.Value) core.Filter {
 	if len(parameters) == 0 {
 		return defaultDefaultFilter
 	}

@@ -6,7 +6,7 @@ import (
 )
 
 // Creates a reverse filter
-func ReverseFactory(parameters []core.Value) Filter {
+func ReverseFactory(parameters []core.Value) core.Filter {
 	return Reverse
 }
 

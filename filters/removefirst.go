@@ -8,7 +8,7 @@ var (
 	EmptyValue = &core.StaticStringValue{[]byte("")}
 )
 
-func RemoveFirstFactory(parameters []core.Value) Filter {
+func RemoveFirstFactory(parameters []core.Value) core.Filter {
 	if len(parameters) != 1 {
 		return Noop
 	}

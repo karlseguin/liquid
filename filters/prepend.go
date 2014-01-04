@@ -5,7 +5,7 @@ import (
 )
 
 // Creates an prepend filter
-func PrependFactory(parameters []core.Value) Filter {
+func PrependFactory(parameters []core.Value) core.Filter {
 	if len(parameters) == 0 {
 		return Noop
 	}

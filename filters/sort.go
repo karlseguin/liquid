@@ -7,7 +7,7 @@ import (
 )
 
 // Creates a sort filter
-func SortFactory(parameters []core.Value) Filter {
+func SortFactory(parameters []core.Value) core.Filter {
 	return Sort
 }
 
