@@ -34,11 +34,11 @@ type Assign struct {
 }
 
 func (a *Assign) AddCode(code core.Code) {
-	panic("Assign should not have been called on a Assign")
+	panic("Addcode should not have been called on a Assign")
 }
 
 func (a *Assign) AddSibling(tag core.Tag) error {
-	panic("Assign should not have been called on a Assign")
+	panic("AddSibling should not have been called on a Assign")
 }
 
 func (a *Assign) Render(data map[string]interface{}) []byte {

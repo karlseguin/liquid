@@ -4,9 +4,7 @@ package liquid
 import (
 	"bytes"
 	"crypto/sha1"
-	// "errors"
 	"fmt"
-	// "strings"
 	"github.com/karlseguin/liquid/core"
 	"io/ioutil"
 )
@@ -113,6 +111,7 @@ func extractTokens(parser *core.Parser, container core.Tag) error {
 			}
 			switch tag.Type() {
 			case core.ContainerTag:
+				container.AddCode(tag)
 				stack = append(stack, container)
 				container = tag
 			case core.EndTag:
@@ -122,6 +121,7 @@ func extractTokens(parser *core.Parser, container core.Tag) error {
 				l := len(stack) - 1
 				container = stack[l]
 				stack = stack[0:l]
+				parser.SkipPastTag()
 			case core.SiblingTag:
 				if err := container.AddSibling(tag); err != nil {
 					return err

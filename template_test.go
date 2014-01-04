@@ -40,6 +40,24 @@ func TestRendersOutputTagsWithStructs(t *testing.T) {
 	spec.Expect(string(template.Render(d))).ToEqual(`duncan, next is 68th. Your master is {{GHOLA.MASTER}}`)
 }
 
+func TestRendersCaptureOfSimpleText(t *testing.T) {
+	spec := gspec.New(t)
+	d := map[string]interface{}{
+		"ghola": PersonS{"Duncan", 67},
+	}
+	template, _ := ParseString("welcome {% capture intro %}Mr.X{%  endcapture%}. {{ intro }}", nil)
+	spec.Expect(string(template.Render(d))).ToEqual(`welcome . Mr.X`)
+}
+
+func TestRendersCaptureWithNestedOutputs(t *testing.T) {
+	spec := gspec.New(t)
+	d := map[string]interface{}{
+		"ghola": PersonS{"Duncan", 67},
+	}
+	template, _ := ParseString("welcome{%   capture name   %} {{ ghola | downcase }}{%endcapture%}! {{ name }}", nil)
+	spec.Expect(string(template.Render(d))).ToEqual(`welcome!  duncan`)
+}
+
 func assertLiteral(t *testing.T, template *Template, index int, expected string) {
 	actual := string(template.Code[index].(*Literal).Value)
 	if actual != expected {

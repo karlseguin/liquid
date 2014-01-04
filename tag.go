@@ -14,6 +14,8 @@ var Tags = map[string]TagFactory{
 	"raw":        tags.RawFactory,
 	"endraw":     tags.EndRawFactory,
 	"assign":     tags.AssignFactory,
+	"capture":    tags.CaptureFactory,
+	"endcapture": tags.EndCaptureFactory,
 }
 
 func newTag(p *core.Parser) (core.Tag, error) {
