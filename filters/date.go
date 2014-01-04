@@ -2,17 +2,17 @@ package filters
 
 import (
 	"github.com/karlseguin/liquid/core"
-	"time"
-	"sync"
 	"strconv"
+	"sync"
+	"time"
 )
 
 var (
-	now = func() time.Time { return time.Now() }
-	zeroTime = time.Time{}
-	timeFormatCache = make(map[string]string)
+	now                 = func() time.Time { return time.Now() }
+	zeroTime            = time.Time{}
+	timeFormatCache     = make(map[string]string)
 	timeFormatCacheLock sync.RWMutex
-	timePartLookup = map[byte]string{
+	timePartLookup      = map[byte]string{
 		'a': "Mon",
 		'A': "Monday",
 		'b': "Jan",
@@ -98,7 +98,7 @@ func alignFormat(t time.Time, ruby string) string {
 
 func buildTimeFormat(t time.Time, ruby string) string {
 	l := len(ruby) - 1
-	format := make([]byte, 0, l * 5)
+	format := make([]byte, 0, l*5)
 	for i := 0; i < l; i++ {
 		if ruby[i] != '%' {
 			format = append(format, ruby[i])

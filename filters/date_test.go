@@ -13,6 +13,7 @@ func init() {
 		return t
 	}
 }
+
 func TestDateNowWithBasicFormat(t *testing.T) {
 	spec := gspec.New(t)
 	filter := DateFactory([]core.Value{stringValue("%Y %m %d")})

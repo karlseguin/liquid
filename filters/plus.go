@@ -77,6 +77,9 @@ func plusInt(plus int, input interface{}) interface{} {
 }
 
 func stringPlusInt(s string, plus int) interface{} {
+	if s == "now" || s == "today" {
+		return now().Add(time.Minute * time.Duration(plus))
+	}
 	if i, err := strconv.Atoi(s); err == nil {
 		return i + plus
 	}

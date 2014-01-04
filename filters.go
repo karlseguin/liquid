@@ -41,5 +41,5 @@ var Filters = map[string]FilterFactory{
 	"sort":           filters.SortFactory,
 	"default":        filters.DefaultFactory,
 	"reverse":        filters.ReverseFactory,
-	"date": filters.DateFactory,
+	"date":           filters.DateFactory,
 }
