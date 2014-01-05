@@ -99,7 +99,7 @@ func (p *Parser) SkipSpaces() (current byte) {
 
 func (p *Parser) ReadValue() (Value, error) {
 	current := p.SkipSpaces()
-	if current == 0 || current == '}' || current == '|' || current == ':' || current == '%' {
+	if isTokenEnd(current) {
 		return nil, nil
 	}
 	if current == '\'' || current == '"' {
@@ -107,6 +107,9 @@ func (p *Parser) ReadValue() (Value, error) {
 	}
 	if current == '-' || (current >= '0' && current <= '9') {
 		return p.ReadStaticNumericValue()
+	}
+	if b, ok := p.ReadStaticBoolValue(); ok {
+		return b, nil
 	}
 	return p.ReadDynamicValues()
 }
@@ -157,6 +160,25 @@ func (p *Parser) ReadStaticNumericValue() (Value, error) {
 	return nil, p.Error("Invalid value. This is either an invalid number, variable name, or maybe you're missing a quote", start)
 }
 
+func (p *Parser) ReadStaticBoolValue() (Value, bool) {
+
+	start := p.Position
+	left := p.Left()
+	if left > 4 {
+		if p.Data[start] == 't' && p.Data[start+1] == 'r' && p.Data[start+2] == 'u' && p.Data[start+3] == 'e' && isTokenEnd(p.Data[start+4]) {
+			p.ForwardBy(4)
+			return &StaticBoolValue{true}, true
+		}
+	}
+	if left > 5 {
+		if p.Data[start] == 'f' && p.Data[start+1] == 'a' && p.Data[start+2] == 'l' && p.Data[start+3] == 's' && p.Data[start+4] == 'e' && isTokenEnd(p.Data[start+5]) {
+			p.ForwardBy(5)
+			return &StaticBoolValue{false}, true
+		}
+	}
+	return nil, false
+}
+
 func (p *Parser) ReadDynamicValues() (Value, error) {
 	values := make([]string, 0, 5)
 	marker := p.Position
@@ -165,7 +187,7 @@ func (p *Parser) ReadDynamicValues() (Value, error) {
 		if current == '.' {
 			values = append(values, strings.ToLower(string(p.Data[marker:p.Position])))
 			marker = p.Position + 1
-		} else if current == '}' || current == ' ' || current == '|' {
+		} else if isTokenEnd(current) {
 			values = append(values, strings.ToLower(string(p.Data[marker:p.Position])))
 			break
 		}
@@ -180,7 +202,7 @@ func (p *Parser) ReadName() string {
 	marker := p.Position
 	for ; p.Position < p.Len; p.Position++ {
 		current := p.Current()
-		if current == ' ' || current == '|' || current == '}' || current == '%' || current == ':' || current == ',' {
+		if isTokenEnd(current) {
 			name = string(p.Data[marker:p.Position])
 			break
 		}
@@ -250,6 +272,9 @@ func (p *Parser) Peek() byte {
 	return p.Data[p.Position+1]
 }
 
+func (p *Parser) Left() int {
+	return p.Len - p.Position
+}
 func (p *Parser) HasMore() bool {
 	return p.Position < p.End
 }
@@ -332,4 +357,8 @@ func detatch(data []byte) []byte {
 	detached := make([]byte, len(data))
 	copy(detached, data)
 	return detached
+}
+
+func isTokenEnd(b byte) bool {
+	return b == ' ' || b == '|' || b == '}' || b == '%' || b == ':' || b == ',' || b == 0
 }

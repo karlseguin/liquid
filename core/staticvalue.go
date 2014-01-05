@@ -35,3 +35,15 @@ func (v *StaticFloatValue) Resolve(data map[string]interface{}) interface{} {
 func (v *StaticFloatValue) Underlying() interface{} {
 	return v.Value
 }
+
+type StaticBoolValue struct {
+	Value bool
+}
+
+func (v *StaticBoolValue) Resolve(data map[string]interface{}) interface{} {
+	return v.Value
+}
+
+func (v *StaticBoolValue) Underlying() interface{} {
+	return v.Value
+}

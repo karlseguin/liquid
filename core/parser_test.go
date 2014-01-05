@@ -84,6 +84,24 @@ func TestParserParsesAStaticValueWithDoubleQuotes(t *testing.T) {
 	spec.Expect(parser.Position).ToEqual(9)
 }
 
+func TestParserParsesTrueBoolean(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser(" true ")
+	value, err := parser.ReadValue()
+	spec.Expect(err).ToBeNil()
+	spec.Expect(value.Resolve(nil).(bool)).ToEqual(true)
+	spec.Expect(parser.Position).ToEqual(5)
+}
+
+func TestParserParsesFalseBoolean(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser(" false ")
+	value, err := parser.ReadValue()
+	spec.Expect(err).ToBeNil()
+	spec.Expect(value.Resolve(nil).(bool)).ToEqual(false)
+	spec.Expect(parser.Position).ToEqual(6)
+}
+
 func TestParserParsesAnInteger(t *testing.T) {
 	spec := gspec.New(t)
 	parser := newParser(" 938 ")
