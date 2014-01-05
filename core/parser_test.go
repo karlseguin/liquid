@@ -102,6 +102,15 @@ func TestParserParsesFalseBoolean(t *testing.T) {
 	spec.Expect(parser.Position).ToEqual(6)
 }
 
+func TestParserParsesEmpty(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser(" empty ")
+	value, err := parser.ReadValue()
+	spec.Expect(err).ToBeNil()
+	spec.Expect(value.Resolve(nil).(string)).ToEqual("liquid:empty")
+	spec.Expect(parser.Position).ToEqual(6)
+}
+
 func TestParserParsesAnInteger(t *testing.T) {
 	spec := gspec.New(t)
 	parser := newParser(" 938 ")

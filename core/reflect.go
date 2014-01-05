@@ -98,3 +98,17 @@ func buildTypeData(value reflect.Value) map[string]int {
 	typeCache[value] = typeData
 	return typeData
 }
+
+//gets the length of string, map or array
+func ToLength(input interface{}) (int, bool) {
+	if s, ok := input.(string); ok {
+		return len(s), true
+	}
+
+	value := reflect.ValueOf(input)
+	kind := value.Kind()
+	if kind == reflect.Array || kind == reflect.Slice || kind == reflect.Map {
+		return value.Len(), true
+	}
+	return 0, false
+}

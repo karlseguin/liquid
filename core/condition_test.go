@@ -16,53 +16,58 @@ func TestUnaryCondition(t *testing.T) {
 }
 
 func TestEqualsConditionWithBalancedStrings(t *testing.T) {
-	assertEqualsCondition(t, true, stringValue("abc"), stringValue("abc"))
-	assertEqualsCondition(t, true, stringValue(""), stringValue(""))
-	assertEqualsCondition(t, false, stringValue("abc"), stringValue("123"))
+	assertEqualsCondition(t, true, true, stringValue("abc"), stringValue("abc"))
+	assertEqualsCondition(t, true, true, stringValue(""), stringValue(""))
+	assertEqualsCondition(t, false, true, stringValue("abc"), stringValue("123"))
 }
 
 func TestEqualsConditionWithBalancedDynamicStrings(t *testing.T) {
-	assertEqualsCondition(t, true, dynamicValue("doesnotexist"), dynamicValue("doesnotexist"))
-	assertEqualsCondition(t, true, dynamicValue("string"), stringValue("astring"))
-	assertEqualsCondition(t, false, dynamicValue("string"), stringValue("other"))
+	assertEqualsCondition(t, true, true, dynamicValue("doesnotexist"), dynamicValue("doesnotexist"))
+	assertEqualsCondition(t, true, true, dynamicValue("string"), stringValue("astring"))
+	assertEqualsCondition(t, false, true, dynamicValue("string"), stringValue("other"))
 }
 
 func TestEqualsConditionWithBalancedDynamicArrays(t *testing.T) {
-	assertEqualsCondition(t, true, dynamicValue("[]int"), dynamicValue("[]int"))
-	assertEqualsCondition(t, false, dynamicValue("[]int"), dynamicValue("[]int2"))
+	assertEqualsCondition(t, true, true, dynamicValue("[]int"), dynamicValue("[]int"))
+	assertEqualsCondition(t, false, true, dynamicValue("[]int"), dynamicValue("[]int2"))
 }
 
 func TestEqualsConditionWithBalancedBools(t *testing.T) {
-	assertEqualsCondition(t, true, boolValue(true), boolValue(true))
-	assertEqualsCondition(t, false, boolValue(true), boolValue(false))
+	assertEqualsCondition(t, true, true, boolValue(true), boolValue(true))
+	assertEqualsCondition(t, false, true, boolValue(true), boolValue(false))
 }
 
 func TestEqualsConditionWithBalancedInt(t *testing.T) {
-	assertEqualsCondition(t, true, intValue(3231), intValue(3231))
-	assertEqualsCondition(t, false, intValue(3231), intValue(2993))
+	assertEqualsCondition(t, true, true, intValue(3231), intValue(3231))
+	assertEqualsCondition(t, false, true, intValue(3231), intValue(2993))
 }
 
 func TestEqualsConditionWithBalancedFloat(t *testing.T) {
-	assertEqualsCondition(t, true, floatValue(11.33), floatValue(11.33))
-	assertEqualsCondition(t, false, floatValue(11.2), floatValue(11.21))
+	assertEqualsCondition(t, true, true, floatValue(11.33), floatValue(11.33))
+	assertEqualsCondition(t, false, true, floatValue(11.2), floatValue(11.21))
 }
 
 func TestEqualWithUnbalancedInt(t *testing.T) {
-	assertEqualsCondition(t, true, intValue(123), stringValue("123"))
-	assertEqualsCondition(t, false, intValue(123), stringValue("1a23"))
-	assertEqualsCondition(t, true, intValue(123), floatValue(123.0))
-	assertEqualsCondition(t, false, intValue(123), floatValue(123.1))
+	assertEqualsCondition(t, true, true, intValue(123), stringValue("123"))
+	assertEqualsCondition(t, false, true, intValue(123), stringValue("1a23"))
+	assertEqualsCondition(t, true, true, intValue(123), floatValue(123.0))
+	assertEqualsCondition(t, false, true, intValue(123), floatValue(123.1))
 }
 
 func TestEqualWithUnbalancedFloats(t *testing.T) {
-	assertEqualsCondition(t, true, floatValue(123.0), stringValue("123"))
-	assertEqualsCondition(t, true, floatValue(123.0), intValue(123))
-	assertEqualsCondition(t, false, floatValue(123.0), stringValue("123.1"))
+	assertEqualsCondition(t, true, true, floatValue(123.0), stringValue("123"))
+	assertEqualsCondition(t, true, true, floatValue(123.0), intValue(123))
+	assertEqualsCondition(t, false, true, floatValue(123.0), stringValue("123.1"))
 }
 
 func TestEqualsWithTime(t *testing.T) {
-	assertEqualsCondition(t, true, dynamicValue("now"), stringValue("today"))
-	assertEqualsCondition(t, false, dynamicValue("yesterday"), stringValue("today"))
+	assertEqualsCondition(t, true, true, dynamicValue("now"), stringValue("today"))
+	assertEqualsCondition(t, false, true, dynamicValue("yesterday"), stringValue("today"))
+}
+
+func TestEqualsWithTimeEmpty(t *testing.T) {
+	assertEqualsCondition(t, false, false, dynamicValue("[]int"), emptyValue())
+	assertEqualsCondition(t, true, false, dynamicValue("[]int3"), emptyValue())
 }
 
 func TestContainsWithString(t *testing.T) {
@@ -121,10 +126,10 @@ func TestConditionGroupWithMultipleConditions(t *testing.T) {
 	assertConditionGroup(t, true, falseCondition(), OR, trueCondition(), AND, falseCondition(), OR, trueCondition())
 }
 
-func assertEqualsCondition(t *testing.T, expected bool, left, right Value) {
+func assertEqualsCondition(t *testing.T, expected bool, extra bool, left, right Value) {
 	assertCondition(t, expected, left, Equals, right)
 	assertCondition(t, !expected, left, NotEquals, right)
-	if expected {
+	if expected && extra{
 		assertCondition(t, false, left, LessThan, right)
 		assertCondition(t, false, left, GreaterThan, right)
 		assertCondition(t, true, left, LessThanOrEqual, right)
@@ -140,6 +145,7 @@ func assertCondition(t *testing.T, expected bool, left Value, op ComparisonOpera
 	data := map[string]interface{}{
 		"[]int":         []int{1, 2, 3},
 		"[]int2":        []int{2, 3, 1},
+		"[]int3":        []int{},
 		"[]interface{}": []interface{}{2, "a", true},
 		"string":        "astring",
 		"now":           time.Now(),
@@ -194,6 +200,10 @@ func dynamicValue(s string) Value {
 	return &DynamicValue{[]string{s}}
 }
 
+func emptyValue() Value {
+	return &StaticEmptyValue{}
+}
+
 func trueCondition() *Condition {
 	return &Condition{boolValue(true), Unary, nil}
 }
@@ -201,3 +211,5 @@ func trueCondition() *Condition {
 func falseCondition() *Condition {
 	return &Condition{boolValue(false), Unary, nil}
 }
+
+

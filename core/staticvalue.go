@@ -63,3 +63,17 @@ func (v *StaticBoolValue) ResolveWithNil(data map[string]interface{}) interface{
 func (v *StaticBoolValue) Underlying() interface{} {
 	return v.Value
 }
+
+type StaticEmptyValue struct {}
+
+func (v *StaticEmptyValue) Resolve(data map[string]interface{}) interface{} {
+	return "liquid:empty"
+}
+
+func (v *StaticEmptyValue) ResolveWithNil(data map[string]interface{}) interface{} {
+	return "liquid:empty"
+}
+
+func (v *StaticEmptyValue) Underlying() interface{} {
+	return "liquid:empty"
+}

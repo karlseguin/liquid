@@ -111,6 +111,9 @@ func (p *Parser) ReadValue() (Value, error) {
 	if b, ok := p.ReadStaticBoolValue(); ok {
 		return b, nil
 	}
+	if e, ok := p.ReadStaticEmptyValue(); ok {
+		return e, nil
+	}
 	return p.ReadDynamicValues()
 }
 
@@ -161,7 +164,6 @@ func (p *Parser) ReadStaticNumericValue() (Value, error) {
 }
 
 func (p *Parser) ReadStaticBoolValue() (Value, bool) {
-
 	start := p.Position
 	left := p.Left()
 	if left > 4 {
@@ -174,6 +176,17 @@ func (p *Parser) ReadStaticBoolValue() (Value, bool) {
 		if p.Data[start] == 'f' && p.Data[start+1] == 'a' && p.Data[start+2] == 'l' && p.Data[start+3] == 's' && p.Data[start+4] == 'e' && isTokenEnd(p.Data[start+5]) {
 			p.ForwardBy(5)
 			return &StaticBoolValue{false}, true
+		}
+	}
+	return nil, false
+}
+
+func (p *Parser) ReadStaticEmptyValue() (Value, bool) {
+	start := p.Position
+	if p.Left() > 5 {
+		if p.Data[start] == 'e' && p.Data[start+1] == 'm' && p.Data[start+2] == 'p' && p.Data[start+3] == 't' && p.Data[start+4] == 'y' && isTokenEnd(p.Data[start+5]) {
+			p.ForwardBy(5)
+			return &StaticEmptyValue{}, true
 		}
 	}
 	return nil, false

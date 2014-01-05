@@ -184,6 +184,13 @@ func UnaryComparison(left, right interface{}) bool {
 }
 
 func EqualsComparison(left, right interface{}) bool {
+	if s, ok := right.(string); ok && s == "liquid:empty" {
+		if n, ok := ToLength(left); ok {
+			return n == 0
+		}
+		return false
+	}
+
 	var t Type
 	if left, right, t = convertToSameType(left, right); t == Unknown {
 		return false
