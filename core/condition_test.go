@@ -65,6 +65,35 @@ func TestEqualsWithTime(t *testing.T) {
 	assertEqualsCondition(t, false, dynamicValue("yesterday"), stringValue("today"))
 }
 
+func TestContainsWithString(t *testing.T) {
+	assertContains(t, true, stringValue("abc123"), stringValue("c12"))
+	assertContains(t, false, stringValue("abc123"), stringValue("c2"))
+}
+
+func TestContainsWithIntArray(t *testing.T) {
+	assertContains(t, true, dynamicValue("[]int"), intValue(1))
+	assertContains(t, false, dynamicValue("[]int"), intValue(5))
+}
+
+func TestContainsWithOther(t *testing.T) {
+	assertContains(t, true, dynamicValue("[]interface{}"), stringValue("a"))
+	assertContains(t, true, dynamicValue("[]interface{}"), intValue(2))
+	assertContains(t, true, dynamicValue("[]interface{}"), boolValue(true))
+	assertContains(t, false, dynamicValue("[]interface{}"), stringValue("b"))
+	assertContains(t, false, dynamicValue("[]interface{}"), intValue(3))
+	assertContains(t, false, dynamicValue("[]interface{}"), boolValue(false))
+}
+
+func TestContainsWithInvalidTypes(t *testing.T) {
+	assertContains(t, false, intValue(5), intValue(5))
+}
+
+func TestContainsWithMap(t *testing.T) {
+	assertContains(t, true, dynamicValue("map[string]int"), stringValue("hello"))
+	assertContains(t, false, dynamicValue("map[string]int"), stringValue("goodbye"))
+	assertContains(t, false, dynamicValue("map[string]int"), intValue(5))
+}
+
 func TestConditionGroupWithOneCondition(t *testing.T) {
 	assertConditionGroup(t, true, trueCondition())
 	assertConditionGroup(t, false, falseCondition())
@@ -103,13 +132,21 @@ func assertEqualsCondition(t *testing.T, expected bool, left, right Value) {
 	}
 }
 
+func assertContains(t *testing.T, expected bool, left, right Value) {
+	assertCondition(t, expected, left, Contains, right)
+}
+
 func assertCondition(t *testing.T, expected bool, left Value, op ComparisonOperator, right Value) {
 	data := map[string]interface{}{
-		"[]int":     []int{1, 2, 3},
-		"[]int2":    []int{2, 3, 1},
-		"string":    "astring",
-		"now":       time.Now(),
-		"yesterday": time.Now().Add(time.Hour * -24),
+		"[]int":         []int{1, 2, 3},
+		"[]int2":        []int{2, 3, 1},
+		"[]interface{}": []interface{}{2, "a", true},
+		"string":        "astring",
+		"now":           time.Now(),
+		"yesterday":     time.Now().Add(time.Hour * -24),
+		"map[string]int": map[string]int{
+			"hello": 44,
+		},
 	}
 	c := &Condition{left, op, right}
 	actual := c.IsTrue(data)

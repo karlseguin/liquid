@@ -1,7 +1,9 @@
 package core
 
 import (
+	"bytes"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -225,8 +227,57 @@ func GreaterThanOrEqualComparison(left, right interface{}) bool {
 	return !TypeOperations[t][LessThan](left, right)
 }
 
+// I think most of this sucks
 func ContainsComparison(left, right interface{}) bool {
-	return false //todo
+	if s, ok := left.(string); ok {
+		return strings.Contains(s, ToString(right))
+	}
+	if b, ok := left.([]byte); ok {
+		return bytes.Contains(b, ToBytes(right))
+	}
+
+	if n, ok := left.([]int); ok {
+		needle, ok := ToInt(right)
+		if ok == false {
+			return false
+		}
+		for i, l := 0, len(n); i < l; i++ {
+			if n[i] == needle {
+				return true
+			}
+		}
+		return false
+	}
+
+	value := reflect.ValueOf(left)
+	kind := value.Kind()
+	if kind == reflect.Array || kind == reflect.Slice {
+		l := value.Len()
+		if l == 0 {
+			return false
+		}
+		needle := ToBytes(right)
+		for i := 0; i < l; i++ {
+			if bytes.Equal(needle, ToBytes(value.Index(i).Interface())) {
+				return true
+			}
+		}
+		return false
+	}
+	if kind == reflect.Map {
+		if value.Len() == 0 {
+			return false
+		}
+		if b, ok := right.([]byte); ok {
+			right = string(b)
+		}
+		rightValue := reflect.ValueOf(right)
+		if rightValue.Type() == value.Type().Key() {
+			return value.MapIndex(rightValue).IsValid()
+		}
+		return false
+	}
+	return false
 }
 
 func convertToSameType(left, right interface{}) (interface{}, interface{}, Type) {
