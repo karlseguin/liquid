@@ -7,7 +7,6 @@ import (
 )
 
 var (
-	now      = func() time.Time { return time.Now() }
 	zeroTime = time.Time{}
 )
 
@@ -41,14 +40,14 @@ func inputToTime(input interface{}) (time.Time, bool) {
 		return timeFromString(string(typed))
 	}
 	if n, ok := core.ToInt(input); ok {
-		return now().Add(time.Minute * time.Duration(n)), true
+		return core.Now().Add(time.Minute * time.Duration(n)), true
 	}
 	return zeroTime, false
 }
 
 func timeFromString(s string) (time.Time, bool) {
 	if s == "now" || s == "today" {
-		return now(), true
+		return core.Now(), true
 	}
 	t, err := time.Parse("2006-01-02 15:04:05 -0700", s)
 	if err != nil {

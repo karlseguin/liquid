@@ -28,7 +28,7 @@ func TestPlusAnIntToAFloat(t *testing.T) {
 func TestPlusAnIntToNow(t *testing.T) {
 	spec := gspec.New(t)
 	filter := PlusFactory([]core.Value{intValue(61)})
-	spec.Expect(filter("now", nil).(time.Time)).ToEqual(now().Add(time.Minute * 61))
+	spec.Expect(filter("now", nil).(time.Time)).ToEqual(core.Now().Add(time.Minute * 61))
 }
 
 func TestPlusAnIntToATime(t *testing.T) {

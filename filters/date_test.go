@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	now = func() time.Time {
+	core.Now = func() time.Time {
 		t, _ := time.Parse("Mon Jan 02 15:04:05 2006", "Mon Jan 02 15:04:05 2006")
 		return t
 	}

@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+	"time"
 )
 
 var (
@@ -57,6 +58,9 @@ func Resolve(data interface{}, field string) interface{} {
 // call this too early, say in Resolve above, we won't be able to build nested
 // paths
 func ResolveFinal(value interface{}) interface{} {
+	if _, ok := value.(time.Time); ok {
+		return value
+	}
 	kind := reflect.ValueOf(value).Kind()
 	if kind == reflect.Ptr || kind == reflect.Struct {
 		return ToBytes(value)

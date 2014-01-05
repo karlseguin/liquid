@@ -8,6 +8,10 @@ func (v *StaticStringValue) Resolve(data map[string]interface{}) interface{} {
 	return v.Value
 }
 
+func (v *StaticStringValue) ResolveWithNil(data map[string]interface{}) interface{} {
+	return v.Value
+}
+
 func (v *StaticStringValue) Underlying() interface{} {
 	return v.Value
 }
@@ -17,6 +21,10 @@ type StaticIntValue struct {
 }
 
 func (v *StaticIntValue) Resolve(data map[string]interface{}) interface{} {
+	return v.Value
+}
+
+func (v *StaticIntValue) ResolveWithNil(data map[string]interface{}) interface{} {
 	return v.Value
 }
 
@@ -32,6 +40,10 @@ func (v *StaticFloatValue) Resolve(data map[string]interface{}) interface{} {
 	return v.Value
 }
 
+func (v *StaticFloatValue) ResolveWithNil(data map[string]interface{}) interface{} {
+	return v.Value
+}
+
 func (v *StaticFloatValue) Underlying() interface{} {
 	return v.Value
 }
@@ -41,6 +53,10 @@ type StaticBoolValue struct {
 }
 
 func (v *StaticBoolValue) Resolve(data map[string]interface{}) interface{} {
+	return v.Value
+}
+
+func (v *StaticBoolValue) ResolveWithNil(data map[string]interface{}) interface{} {
 	return v.Value
 }
 
