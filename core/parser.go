@@ -62,7 +62,7 @@ func (p *Parser) ToMarkup() ([]byte, MarkupType) {
 		pre = p.Data[start:p.Position]
 	}
 	p.Commit()
-	return pre, markupType
+	return detach(pre), markupType
 }
 
 func (p *Parser) SkipPastTag() {
@@ -502,4 +502,10 @@ func unescape(data []byte, escaped int) []byte {
 
 func isTokenEnd(b byte) bool {
 	return b == ' ' || b == '|' || b == '}' || b == '%' || b == ':' || b == ',' || b == 0
+}
+
+func detach(data []byte) []byte {
+	detached := make([]byte, len(data))
+	copy(detached, data)
+	return detached
 }
