@@ -287,7 +287,7 @@ func (p *Parser) ReadConditionGroup() (Verifiable, error) {
 			return nil, err
 		}
 		if left == nil {
-			return nil, p.Error("Invalid of missing if/else condition", start)
+			return nil, p.Error("Invalid of missing left value in condition", start)
 		}
 
 		if p.SkipSpaces() == '%' {
@@ -298,7 +298,7 @@ func (p *Parser) ReadConditionGroup() (Verifiable, error) {
 		if operator == UnknownComparator {
 			logical := p.ReadLogicalOperator()
 			if logical == UnknownLogical {
-				return nil, p.Error("Unknown if/else operator (should be ==, !=, >, <, >=, <= or contains)", start)
+				return nil, p.Error("Invalid or missing operator (should be ==, !=, >, <, >=, <= or contains)", start)
 			}
 			group.conditions = append(group.conditions, &Condition{left, Unary, nil})
 			group.joins = append(group.joins, logical)
@@ -310,7 +310,7 @@ func (p *Parser) ReadConditionGroup() (Verifiable, error) {
 			return nil, err
 		}
 		if right == nil {
-			return nil, p.Error("Invalid of missing if/else condition", start)
+			return nil, p.Error("Invalid of missing right value in condition", start)
 		}
 		group.conditions = append(group.conditions, &Condition{left, operator, right})
 
@@ -320,7 +320,7 @@ func (p *Parser) ReadConditionGroup() (Verifiable, error) {
 
 		logical := p.ReadLogicalOperator()
 		if logical == UnknownLogical {
-			return nil, p.Error("Expecting and/or or end if if/else statement", start)
+			return nil, p.Error("Invalid condition. Expecting 'and', 'or' or end of tag", start)
 		}
 		group.joins = append(group.joins, logical)
 	}
@@ -395,7 +395,7 @@ func (p *Parser) ReadPartialCondition() (Completable, error) {
 			return nil, err
 		}
 		if value == nil {
-			return nil, p.Error("Invalid of missing when value", start)
+			return nil, p.Error("Invalid of missing value for condition", start)
 		}
 		group.conditions = append(group.conditions, &Condition{value, UnknownComparator, nil})
 
@@ -404,7 +404,7 @@ func (p *Parser) ReadPartialCondition() (Completable, error) {
 		}
 		logical := p.ReadLogicalOperator()
 		if logical == UnknownLogical {
-			return nil, p.Error("Expecting and/or or end of when tag", start)
+			return nil, p.Error("Invalid condition. Expecting 'and', 'or' or end of tag", start)
 		}
 		group.joins = append(group.joins, logical)
 	}
