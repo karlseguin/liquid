@@ -28,10 +28,10 @@ func (v *DynamicValue) resolve(data map[string]interface{}) interface{} {
 	var d interface{} = data
 	var p interface{}
 
-	for i, l := 0, len(v.Fields); i < l; i ++ {
+	for i, l := 0, len(v.Fields); i < l; i++ {
 		field := v.Fields[i]
 		if d = Resolve(d, field); d == nil {
-			if field == "size" && i == l - 1 && p != nil {
+			if field == "size" && i == l-1 && p != nil {
 				if n, ok := ToLength(p); ok {
 					return n
 				}

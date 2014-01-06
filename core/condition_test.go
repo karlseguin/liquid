@@ -129,7 +129,7 @@ func TestConditionGroupWithMultipleConditions(t *testing.T) {
 func assertEqualsCondition(t *testing.T, expected bool, extra bool, left, right Value) {
 	assertCondition(t, expected, left, Equals, right)
 	assertCondition(t, !expected, left, NotEquals, right)
-	if expected && extra{
+	if expected && extra {
 		assertCondition(t, false, left, LessThan, right)
 		assertCondition(t, false, left, GreaterThan, right)
 		assertCondition(t, true, left, LessThanOrEqual, right)
@@ -164,13 +164,13 @@ func assertCondition(t *testing.T, expected bool, left Value, op ComparisonOpera
 func assertConditionGroup(t *testing.T, expected bool, data ...interface{}) {
 	l := len(data)
 	group := &ConditionGroup{
-		joins:      make([]ConditionGroupJoin, 0, l/2),
+		joins:      make([]LogicalOperator, 0, l/2),
 		conditions: make([]*Condition, 0, l-l/2),
 	}
 	for i := 0; i < l; i += 2 {
 		group.conditions = append(group.conditions, data[i].(*Condition))
 		if i+1 < l {
-			group.joins = append(group.joins, data[i+1].(ConditionGroupJoin))
+			group.joins = append(group.joins, data[i+1].(LogicalOperator))
 		}
 	}
 
@@ -211,5 +211,3 @@ func trueCondition() *Condition {
 func falseCondition() *Condition {
 	return &Condition{boolValue(false), Unary, nil}
 }
-
-

@@ -58,6 +58,51 @@ func TestRendersCaptureWithNestedOutputs(t *testing.T) {
 	spec.Expect(string(template.Render(d))).ToEqual(`welcome!  duncan`)
 }
 
+func TestRenderSimpleIfstatement(t *testing.T) {
+	spec := gspec.New(t)
+	template, _ := ParseString("A-{% if 2 == 2 %}in if{% endif %}-Z", nil)
+	spec.Expect(string(template.Render(nil))).ToEqual(`A-in if-Z`)
+}
+
+func TestRenderSimpleElseIfstatement(t *testing.T) {
+	spec := gspec.New(t)
+	template, _ := ParseString("A-{% if 0 == 2 %}in if{% elseif 2 == 2 %}in elseif{% endif %}-Z", nil)
+	spec.Expect(string(template.Render(nil))).ToEqual(`A-in elseif-Z`)
+}
+
+func TestRenderSimpleElseStatement(t *testing.T) {
+	spec := gspec.New(t)
+	template, _ := ParseString("A-{% if 0 == 2 %}in if{% elseif 2 == 0 %}in elseif{% else %}in else{% endif %}-Z", nil)
+	spec.Expect(string(template.Render(nil))).ToEqual(`A-in else-Z`)
+}
+
+func TestRenderANilCheckAgainstDynamicValue(t *testing.T) {
+	spec := gspec.New(t)
+	d := map[string]interface{}{
+		"ghola": PersonS{"Duncan", 67},
+	}
+	template, _ := ParseString("A-{% if false %}in if{% elseif ghola %}in elseif{% else %}in else{% endif %}-Z", nil)
+	spec.Expect(string(template.Render(d))).ToEqual(`A-in elseif-Z`)
+}
+
+func TestRendersNothingForAFailedUnless(t *testing.T) {
+	spec := gspec.New(t)
+	template, _ := ParseString("A-{% unless true %}in unless{%endunless%}-Z", nil)
+	spec.Expect(string(template.Render(nil))).ToEqual(`A--Z`)
+}
+
+func TestRendersAnUnlessTag(t *testing.T) {
+	spec := gspec.New(t)
+	template, _ := ParseString("A-{% unless false %}in unless{%endunless%}-Z", nil)
+	spec.Expect(string(template.Render(nil))).ToEqual(`A-in unless-Z`)
+}
+
+func TestRendersElseAFailedUnless(t *testing.T) {
+	spec := gspec.New(t)
+	template, _ := ParseString("A-{% unless true %}in if{%else%}in else{%endunless%}-Z", nil)
+	spec.Expect(string(template.Render(nil))).ToEqual(`A-in else-Z`)
+}
+
 func assertLiteral(t *testing.T, template *Template, index int, expected string) {
 	actual := string(template.Code[index].(*Literal).Value)
 	if actual != expected {

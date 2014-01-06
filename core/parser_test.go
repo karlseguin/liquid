@@ -252,6 +252,68 @@ func TestParserReadsMultipleParameters(t *testing.T) {
 	spec.Expect(parser.Position).ToEqual(15)
 }
 
+func TestParserReadsAUnaryCondition(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser(" true %}")
+	group, err := parser.ReadConditionGroup()
+	spec.Expect(err).ToBeNil()
+	assertParsedConditionGroup(t, group, true, Unary, nil)
+}
+
+func TestParserReadsMultipleUnaryConditions(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser(" true and false%}")
+	group, err := parser.ReadConditionGroup()
+	spec.Expect(err).ToBeNil()
+	assertParsedConditionGroup(t, group, true, Unary, nil, AND, false, Unary, nil)
+}
+
+func TestParserReadsSingleCondition(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser(" true == 123   %}")
+	group, err := parser.ReadConditionGroup()
+	spec.Expect(err).ToBeNil()
+	assertParsedConditionGroup(t, group, true, Equals, 123)
+}
+
+func TestParserReadsContainsCondition(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser(" 'xyz'   contains   true%}")
+	group, err := parser.ReadConditionGroup()
+	spec.Expect(err).ToBeNil()
+	assertParsedConditionGroup(t, group, "xyz", Contains, true)
+}
+
+func TestParserReadsMultipleComplexConditions(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser(" 'xyz'   contains   true or true and 123 > 445%}")
+	group, err := parser.ReadConditionGroup()
+	spec.Expect(err).ToBeNil()
+	assertParsedConditionGroup(t, group, "xyz", Contains, true, OR, true, Unary, nil, AND, 123, GreaterThan, 445)
+}
+
 func newParser(s string) *Parser {
 	return NewParser([]byte(s))
+}
+
+func assertParsedConditionGroup(t *testing.T, group Verifiable, data ...interface{}) {
+	spec := gspec.New(t)
+	for i := 0; i < len(data); i += 4 {
+		actual := group.(*ConditionGroup).conditions[i%3]
+		if s, ok := data[i].(string); ok {
+			spec.Expect(string(actual.left.ResolveWithNil(nil).([]byte))).ToEqual(s)
+		} else {
+			spec.Expect(actual.left.ResolveWithNil(nil)).ToEqual(data[i])
+		}
+		spec.Expect(actual.operator).ToEqual(data[i+1])
+		if data[i+2] == nil {
+			spec.Expect(actual.right).ToBeNil()
+		} else {
+			spec.Expect(actual.right.ResolveWithNil(nil)).ToEqual(data[i+2])
+		}
+		if i != len(data)-3 {
+			logical := group.(*ConditionGroup).joins[i%3]
+			spec.Expect(logical).ToEqual(data[i+3])
+		}
+	}
 }

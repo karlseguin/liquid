@@ -90,6 +90,7 @@ func buildTemplate(data []byte) (*Template, error) {
 
 func extractTokens(parser *core.Parser, container core.Tag) error {
 	stack := make([]core.Tag, 0, 0)
+	parentContainer := container
 	for parser.HasMore() {
 		pre, markupType := parser.ToMarkup()
 		if len(pre) > 0 {
@@ -114,18 +115,21 @@ func extractTokens(parser *core.Parser, container core.Tag) error {
 				container.AddCode(tag)
 				stack = append(stack, container)
 				container = tag
+				parentContainer = tag
 			case core.EndTag:
-				if tag.Name() != container.Name() {
+				if tag.Name() != parentContainer.Name() {
 					return parser.Error("unexpected end tag", start)
 				}
 				l := len(stack) - 1
 				container = stack[l]
+				parentContainer = nil
 				stack = stack[0:l]
 				parser.SkipPastTag()
 			case core.SiblingTag:
-				if err := container.AddSibling(tag); err != nil {
+				if err := parentContainer.AddSibling(tag); err != nil {
 					return err
 				}
+				container = tag
 			case core.StandaloneTag:
 				container.AddCode(tag)
 			}

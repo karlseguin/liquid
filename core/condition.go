@@ -7,13 +7,14 @@ import (
 	"time"
 )
 
-type ConditionGroupJoin int
+type LogicalOperator int
 type ComparisonOperator int
 type Type int
 
 const (
-	OR ConditionGroupJoin = iota
+	OR LogicalOperator = iota
 	AND
+	UnknownLogical
 
 	Equals ComparisonOperator = iota
 	NotEquals
@@ -22,7 +23,10 @@ const (
 	LessThanOrEqual
 	GreaterThanOrEqual
 	Contains
+	NotContains
 	Unary
+	NotUnary
+	UnknownComparator
 
 	String Type = iota
 	Nil
@@ -115,6 +119,7 @@ type ConditionResolver func(left, right interface{}) bool
 
 var ConditionLookup = map[ComparisonOperator]ConditionResolver{
 	Unary:              UnaryComparison,
+	NotUnary:           NotUnaryComparison,
 	Equals:             EqualsComparison,
 	NotEquals:          NotEqualsComparison,
 	LessThan:           LessThanComparison,
@@ -124,22 +129,32 @@ var ConditionLookup = map[ComparisonOperator]ConditionResolver{
 	Contains:           ContainsComparison,
 }
 
+type Verifiable interface {
+	IsTrue(data map[string]interface{}) bool
+	Inverse()
+}
+
 // represents a group of conditions
 type ConditionGroup struct {
 	conditions []*Condition
-	joins      []ConditionGroupJoin
+	joins      []LogicalOperator
+	inverse    bool
+}
+
+func (g *ConditionGroup) Inverse() {
+	g.inverse = true
 }
 
 func (g *ConditionGroup) IsTrue(data map[string]interface{}) bool {
 	l := len(g.conditions) - 1
 	if l == 0 {
-		return g.conditions[0].IsTrue(data)
+		return g.realReturn(g.conditions[0].IsTrue(data))
 	}
 
 	for i := 0; i <= l; i++ {
 		if g.conditions[i].IsTrue(data) {
 			if i == l || g.joins[i] == OR {
-				return true
+				return g.realReturn(true)
 			}
 		} else if i != l && g.joins[i] == AND {
 			for ; i < l; i++ {
@@ -149,7 +164,29 @@ func (g *ConditionGroup) IsTrue(data map[string]interface{}) bool {
 			}
 		}
 	}
-	return false
+	return g.realReturn(false)
+}
+
+func (g *ConditionGroup) realReturn(b bool) bool {
+	if g.inverse {
+		return !b
+	}
+	return b
+}
+
+type TrueCondition struct {
+	inverse bool
+}
+
+func (t *TrueCondition) IsTrue(data map[string]interface{}) bool {
+	if t.inverse {
+		return false
+	}
+	return true
+}
+
+func (t *TrueCondition) Inverse() {
+	t.inverse = true
 }
 
 // represents a conditions (such as x == y)
@@ -181,6 +218,10 @@ func UnaryComparison(left, right interface{}) bool {
 		return len(typed) > 0
 	}
 	return true
+}
+
+func NotUnaryComparison(left, right interface{}) bool {
+	return !UnaryComparison(left, right)
 }
 
 func EqualsComparison(left, right interface{}) bool {
@@ -285,6 +326,10 @@ func ContainsComparison(left, right interface{}) bool {
 		return false
 	}
 	return false
+}
+
+func NotContainsComparison(left, right interface{}) bool {
+	return !ContainsComparison(left, right)
 }
 
 func convertToSameType(left, right interface{}) (interface{}, interface{}, Type) {

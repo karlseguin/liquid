@@ -278,6 +278,114 @@ func (p *Parser) ReadFilters() ([]Filter, error) {
 	return filters, nil
 }
 
+func (p *Parser) ReadConditionGroup() (Verifiable, error) {
+	start := p.Position
+	group := &ConditionGroup{make([]*Condition, 0, 2), make([]LogicalOperator, 0, 1), false}
+	for {
+		left, err := p.ReadValue()
+		if err != nil {
+			return nil, err
+		}
+		if left == nil {
+			return nil, p.Error("Invalid of missing if/else condition", start)
+		}
+
+		if p.SkipSpaces() == '%' {
+			group.conditions = append(group.conditions, &Condition{left, Unary, nil})
+			break
+		}
+		operator := p.ReadComparisonOperator()
+		if operator == UnknownComparator {
+			logical := p.ReadLogicalOperator()
+			if logical == UnknownLogical {
+				return nil, p.Error("Unknown if/else operator (should be ==, !=, >, <, >=, <= or contains)", start)
+			}
+			group.conditions = append(group.conditions, &Condition{left, Unary, nil})
+			group.joins = append(group.joins, logical)
+			continue
+		}
+
+		right, err := p.ReadValue()
+		if err != nil {
+			return nil, err
+		}
+		if right == nil {
+			return nil, p.Error("Invalid of missing if/else condition", start)
+		}
+		group.conditions = append(group.conditions, &Condition{left, operator, right})
+
+		if p.SkipSpaces() == '%' {
+			break
+		}
+
+		logical := p.ReadLogicalOperator()
+		if logical == UnknownLogical {
+			return nil, p.Error("Expecting and/or or end if if/else statement", start)
+		}
+		group.joins = append(group.joins, logical)
+	}
+	p.Commit()
+	return group, nil
+}
+
+func (p *Parser) ReadComparisonOperator() ComparisonOperator {
+	left := p.Left()
+	start := p.Position
+	if left > 1 {
+		current := p.Data[start]
+		next := p.Data[start+1]
+		if current == '=' && next == '=' && isTokenEnd(p.Data[start+2]) {
+			p.ForwardBy(2)
+			return Equals
+		}
+		if current == '!' && next == '=' && isTokenEnd(p.Data[start+2]) {
+			p.ForwardBy(2)
+			return NotEquals
+		}
+		if current == '>' && isTokenEnd(next) {
+			p.ForwardBy(1)
+			return GreaterThan
+		}
+		if current == '<' && isTokenEnd(next) {
+			p.ForwardBy(1)
+			return LessThan
+		}
+		if current == '>' && next == '=' && isTokenEnd(p.Data[start+2]) {
+			p.ForwardBy(2)
+			return GreaterThanOrEqual
+		}
+		if current == '<' && next == '=' && isTokenEnd(p.Data[start+2]) {
+			p.ForwardBy(1)
+			return LessThanOrEqual
+		}
+		if left > 7 {
+			if current == 'c' && next == 'o' && p.Data[start+2] == 'n' && p.Data[start+3] == 't' && p.Data[start+4] == 'a' && p.Data[start+5] == 'i' && p.Data[start+6] == 'n' && p.Data[start+7] == 's' && isTokenEnd(p.Data[start+8]) {
+				p.ForwardBy(8)
+				return Contains
+			}
+		}
+	}
+	return UnknownComparator
+}
+
+func (p *Parser) ReadLogicalOperator() LogicalOperator {
+	left := p.Left()
+	start := p.Position
+	if left > 2 {
+		current := p.Data[start]
+		next := p.Data[start+1]
+		if current == 'o' && next == 'r' && isTokenEnd(p.Data[start+2]) {
+			p.ForwardBy(2)
+			return OR
+		}
+		if current == 'a' && next == 'n' && p.Data[start+2] == 'd' && isTokenEnd(p.Data[start+3]) {
+			p.ForwardBy(3)
+			return AND
+		}
+	}
+	return UnknownLogical
+}
+
 func (p *Parser) Peek() byte {
 	if p.Position == p.End {
 		return 0

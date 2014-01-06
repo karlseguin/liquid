@@ -64,7 +64,7 @@ func (v *StaticBoolValue) Underlying() interface{} {
 	return v.Value
 }
 
-type StaticEmptyValue struct {}
+type StaticEmptyValue struct{}
 
 func (v *StaticEmptyValue) Resolve(data map[string]interface{}) interface{} {
 	return "liquid:empty"

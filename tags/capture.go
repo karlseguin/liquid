@@ -1,7 +1,6 @@
 package tags
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"github.com/karlseguin/liquid/core"
@@ -21,16 +20,12 @@ func CaptureFactory(p *core.Parser) (core.Tag, error) {
 		return nil, p.Error("Invalid assignment, variable not found. ", start)
 	}
 	p.SkipPastTag()
-	return &Capture{name, make([]core.Code, 0, 5)}, nil
+	return &Capture{name, NewCommon()}, nil
 }
 
 type Capture struct {
 	name string
-	Code []core.Code
-}
-
-func (c *Capture) AddCode(code core.Code) {
-	c.Code = append(c.Code, code)
+	*Common
 }
 
 func (c *Capture) AddSibling(tag core.Tag) error {
@@ -38,11 +33,7 @@ func (c *Capture) AddSibling(tag core.Tag) error {
 }
 
 func (c *Capture) Render(data map[string]interface{}) []byte {
-	buffer := new(bytes.Buffer)
-	for _, code := range c.Code {
-		buffer.Write(code.Render(data))
-	}
-	data[c.name] = buffer.Bytes()
+	data[c.name] = c.Common.Render(data)
 	return nil
 }
 
