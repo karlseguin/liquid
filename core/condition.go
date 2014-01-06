@@ -296,6 +296,16 @@ func ContainsComparison(left, right interface{}) bool {
 		return bytes.Contains(b, ToBytes(right))
 	}
 
+	if strs, ok := left.([]string); ok {
+		needle := ToString(right)
+		for i, l := 0, len(strs); i < l; i++ {
+			if strs[i] == needle {
+				return true
+			}
+		}
+		return false
+	}
+
 	if n, ok := left.([]int); ok {
 		needle, ok := ToInt(right)
 		if ok == false {
@@ -316,9 +326,8 @@ func ContainsComparison(left, right interface{}) bool {
 		if l == 0 {
 			return false
 		}
-		needle := ToBytes(right)
 		for i := 0; i < l; i++ {
-			if bytes.Equal(needle, ToBytes(value.Index(i).Interface())) {
+			if EqualsComparison(value.Index(i).Interface(), right) {
 				return true
 			}
 		}
