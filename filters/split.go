@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-var defaultSplit = (&SplitFilter{&core.StaticStringValue{[]byte(" ")}}).Split
+var defaultSplit = (&SplitFilter{&core.StaticStringValue{" "}}).Split
 
 // Creates a join filter
 func SplitFactory(parameters []core.Value) core.Filter {

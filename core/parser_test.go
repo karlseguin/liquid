@@ -71,7 +71,7 @@ func TestParserParsesAStaticValue(t *testing.T) {
 	parser := newParser(` 'hel"lo' `)
 	value, err := parser.ReadValue()
 	spec.Expect(err).ToBeNil()
-	spec.Expect(string(value.Resolve(nil).([]byte))).ToEqual(`hel"lo`)
+	spec.Expect(value.Resolve(nil).(string)).ToEqual(`hel"lo`)
 	spec.Expect(parser.Position).ToEqual(9)
 }
 
@@ -80,7 +80,7 @@ func TestParserParsesAStaticValueWithDoubleQuotes(t *testing.T) {
 	parser := newParser(` "hello'" `)
 	value, err := parser.ReadValue()
 	spec.Expect(err).ToBeNil()
-	spec.Expect(string(value.Resolve(nil).([]byte))).ToEqual("hello'")
+	spec.Expect(value.Resolve(nil).(string)).ToEqual("hello'")
 	spec.Expect(parser.Position).ToEqual(9)
 }
 
@@ -152,7 +152,7 @@ func TestParserParsesAStaticValueWithEscapedQuote(t *testing.T) {
 	parser := newParser(" 'hello \\'You\\' ' ")
 	value, err := parser.ReadValue()
 	spec.Expect(err).ToBeNil()
-	spec.Expect(string(value.Resolve(nil).([]byte))).ToEqual("hello 'You' ")
+	spec.Expect(value.Resolve(nil).(string)).ToEqual("hello 'You' ")
 	spec.Expect(parser.Position).ToEqual(17)
 }
 
@@ -237,7 +237,7 @@ func TestParserReadsASingleParameter(t *testing.T) {
 	values, err := parser.ReadParameters()
 	spec.Expect(err).ToBeNil()
 	spec.Expect(len(values)).ToEqual(1)
-	spec.Expect(string(values[0].Resolve(nil).([]byte))).ToEqual("hello")
+	spec.Expect(values[0].Resolve(nil).(string)).ToEqual("hello")
 	spec.Expect(parser.Position).ToEqual(8)
 }
 
@@ -247,7 +247,7 @@ func TestParserReadsMultipleParameters(t *testing.T) {
 	values, err := parser.ReadParameters()
 	spec.Expect(err).ToBeNil()
 	spec.Expect(len(values)).ToEqual(2)
-	spec.Expect(string(values[0].Resolve(nil).([]byte))).ToEqual("hello")
+	spec.Expect(values[0].Resolve(nil).(string)).ToEqual("hello")
 	spec.Expect(values[1].Resolve(nil).(int)).ToEqual(123)
 	spec.Expect(parser.Position).ToEqual(15)
 }
@@ -317,7 +317,7 @@ func assertParsedConditionGroup(t *testing.T, group Verifiable, data ...interfac
 	for i := 0; i < len(data); i += 4 {
 		actual := group.(*ConditionGroup).conditions[i%3]
 		if s, ok := data[i].(string); ok {
-			spec.Expect(string(actual.left.ResolveWithNil(nil).([]byte))).ToEqual(s)
+			spec.Expect(actual.left.ResolveWithNil(nil).(string)).ToEqual(s)
 		} else {
 			spec.Expect(actual.left.ResolveWithNil(nil)).ToEqual(data[i])
 		}

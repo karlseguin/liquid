@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	EmptyValue = &core.StaticStringValue{[]byte("")}
+	EmptyValue = &core.StaticStringValue{""}
 )
 
 func RemoveFirstFactory(parameters []core.Value) core.Filter {

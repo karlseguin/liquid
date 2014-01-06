@@ -1,7 +1,7 @@
 package core
 
 type StaticStringValue struct {
-	Value []byte
+	Value string
 }
 
 func (v *StaticStringValue) Resolve(data map[string]interface{}) interface{} {

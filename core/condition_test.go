@@ -185,7 +185,7 @@ func boolValue(b bool) Value {
 }
 
 func stringValue(s string) Value {
-	return &StaticStringValue{[]byte(s)}
+	return &StaticStringValue{s}
 }
 
 func intValue(n int) Value {

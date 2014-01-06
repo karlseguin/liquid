@@ -80,7 +80,7 @@ func TestTimesDynamicNoop(t *testing.T) {
 }
 
 func stringValue(s string) core.Value {
-	return &core.StaticStringValue{[]byte(s)}
+	return &core.StaticStringValue{s}
 }
 
 func intValue(n int) core.Value {

@@ -9,17 +9,17 @@ import (
 func TestDefaultWithBuiltinValue(t *testing.T) {
 	spec := gspec.New(t)
 	filter := DefaultFactory(nil)
-	spec.Expect(string(filter(nil, nil).([]byte))).ToEqual("")
+	spec.Expect(filter(nil, nil).(string)).ToEqual("")
 }
 
 func TestDefaultWithValueOnString(t *testing.T) {
 	spec := gspec.New(t)
 	filter := DefaultFactory([]core.Value{stringValue("d")})
-	spec.Expect(string(filter("", nil).([]byte))).ToEqual("d")
+	spec.Expect(filter("", nil).(string)).ToEqual("d")
 }
 
 func TestDefaultWithValueOnArray(t *testing.T) {
 	spec := gspec.New(t)
 	filter := DefaultFactory([]core.Value{stringValue("n/a")})
-	spec.Expect(string(filter([]int{}, nil).([]byte))).ToEqual("n/a")
+	spec.Expect(filter([]int{}, nil).(string)).ToEqual("n/a")
 }

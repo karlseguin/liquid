@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-var defaultJoin = (&JoinFilter{&core.StaticStringValue{[]byte(" ")}}).Join
+var defaultJoin = (&JoinFilter{&core.StaticStringValue{" "}}).Join
 
 // Creates a join filter
 func JoinFactory(parameters []core.Value) core.Filter {

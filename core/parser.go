@@ -139,11 +139,11 @@ func (p *Parser) ReadStaticStringValue(delimiter byte) (Value, error) {
 		return nil, p.Error("Invalid value, a single quote might be missing", start)
 	}
 	p.Commit()
-	var data []byte
+	var data string
 	if escaped > 0 {
-		data = unescape(p.Data[start:p.Position-1], escaped)
+		data = string(unescape(p.Data[start:p.Position-1], escaped))
 	} else {
-		data = detatch(p.Data[start : p.Position-1])
+		data = string(p.Data[start : p.Position-1])
 	}
 	return &StaticStringValue{data}, nil
 }
@@ -498,12 +498,6 @@ func unescape(data []byte, escaped int) []byte {
 	}
 	copy(value[position:], data[i:])
 	return value
-}
-
-func detatch(data []byte) []byte {
-	detached := make([]byte, len(data))
-	copy(detached, data)
-	return detached
 }
 
 func isTokenEnd(b byte) bool {

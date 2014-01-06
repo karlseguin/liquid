@@ -6,7 +6,7 @@ import (
 
 var (
 	defaultTruncateLimit  = &core.StaticIntValue{50}
-	defaultTruncateAppend = &core.StaticStringValue{[]byte("...")}
+	defaultTruncateAppend = &core.StaticStringValue{"..."}
 	defaultTruncate       = (&TruncateFilter{defaultTruncateLimit, defaultTruncateAppend}).Truncate
 )
 
