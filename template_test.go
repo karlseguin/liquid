@@ -103,6 +103,24 @@ func TestRendersElseAFailedUnless(t *testing.T) {
 	spec.Expect(string(template.Render(nil))).ToEqual(`A-in else-Z`)
 }
 
+func TestRendersCaseWhen1(t *testing.T) {
+	spec := gspec.New(t)
+	template, _ := ParseString("A-{% case 'abc' %}{% when 'abc' %}when1{% when 1 or 123 %}when2{% else %}else{% endcase%}-Z", nil)
+	spec.Expect(string(template.Render(nil))).ToEqual(`A-when1-Z`)
+}
+
+func TestRendersCaseWhen2(t *testing.T) {
+	spec := gspec.New(t)
+	template, _ := ParseString("A-{% case 123 %}{% when 'abc' %}when1{% when 1 or 123 %}when2{% else %}else{% endcase%}-Z", nil)
+	spec.Expect(string(template.Render(nil))).ToEqual(`A-when2-Z`)
+}
+
+func TestRendersCaseElse(t *testing.T) {
+	spec := gspec.New(t)
+	template, _ := ParseString("A-{% case other %}{% when 'abc' %}when1{% when 1 or 123 %}when2{% else %}else{% endcase%}-Z", nil)
+	spec.Expect(string(template.Render(nil))).ToEqual(`A-else-Z`)
+}
+
 func assertLiteral(t *testing.T, template *Template, index int, expected string) {
 	actual := string(template.Code[index].(*Literal).Value)
 	if actual != expected {

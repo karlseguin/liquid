@@ -129,6 +129,11 @@ var ConditionLookup = map[ComparisonOperator]ConditionResolver{
 	Contains:           ContainsComparison,
 }
 
+type Completable interface {
+	Complete(value Value, operator ComparisonOperator)
+	Verifiable
+}
+
 type Verifiable interface {
 	IsTrue(data map[string]interface{}) bool
 	Inverse()
@@ -143,6 +148,13 @@ type ConditionGroup struct {
 
 func (g *ConditionGroup) Inverse() {
 	g.inverse = true
+}
+
+func (g ConditionGroup) Complete(value Value, operator ComparisonOperator) {
+	for _, condition := range g.conditions {
+		condition.right = value
+		condition.operator = operator
+	}
 }
 
 func (g *ConditionGroup) IsTrue(data map[string]interface{}) bool {

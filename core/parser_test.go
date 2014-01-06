@@ -292,6 +292,22 @@ func TestParserReadsMultipleComplexConditions(t *testing.T) {
 	assertParsedConditionGroup(t, group, "xyz", Contains, true, OR, true, Unary, nil, AND, 123, GreaterThan, 445)
 }
 
+func TestParserReadsASinglePartial(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser(" true %}")
+	group, err := parser.ReadPartialCondition()
+	spec.Expect(err).ToBeNil()
+	assertParsedConditionGroup(t, group, true, UnknownComparator, nil)
+}
+
+func TestParserReadsMultiplePartials(t *testing.T) {
+	spec := gspec.New(t)
+	parser := newParser(" 1 or 2%}")
+	group, err := parser.ReadPartialCondition()
+	spec.Expect(err).ToBeNil()
+	assertParsedConditionGroup(t, group, 1, UnknownComparator, nil, OR, 2, UnknownComparator, nil)
+}
+
 func newParser(s string) *Parser {
 	return NewParser([]byte(s))
 }

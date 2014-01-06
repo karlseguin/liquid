@@ -16,7 +16,6 @@ The following filters are missing:
 
 The following tags are missing:
 
-- case
 - cycle
 - for
 - include

@@ -57,7 +57,7 @@ type If struct {
 func (i *If) AddSibling(tag core.Tag) error {
 	ifs, ok := tag.(IfSibling)
 	if ok == false {
-		return errors.New(fmt.Sprintf("%q does not belong as a sibling of an if"))
+		return errors.New(fmt.Sprintf("%q does not belong inside of an if"))
 	}
 	i.conditions = append(i.conditions, ifs)
 	return nil
@@ -128,4 +128,7 @@ func (e *Else) Type() core.TagType {
 
 func (e *Else) Condition() core.Verifiable {
 	return e.condition
+}
+
+func (e *Else) AddLeftValue(value core.Value) {
 }

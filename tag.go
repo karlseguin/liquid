@@ -22,6 +22,9 @@ var Tags = map[string]TagFactory{
 	"endif":      tags.EndIfFactory,
 	"unless":     tags.UnlessFactory,
 	"endunless":  tags.EndUnlessFactory,
+	"case":       tags.CaseFactory,
+	"when":       tags.WhenFactory,
+	"endcase":    tags.EndCaseFactory,
 }
 
 func newTag(p *core.Parser) (core.Tag, error) {

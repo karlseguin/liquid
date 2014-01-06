@@ -386,6 +386,32 @@ func (p *Parser) ReadLogicalOperator() LogicalOperator {
 	return UnknownLogical
 }
 
+func (p *Parser) ReadPartialCondition() (Completable, error) {
+	start := p.Position
+	group := &ConditionGroup{make([]*Condition, 0, 2), make([]LogicalOperator, 0, 1), false}
+	for {
+		value, err := p.ReadValue()
+		if err != nil {
+			return nil, err
+		}
+		if value == nil {
+			return nil, p.Error("Invalid of missing when value", start)
+		}
+		group.conditions = append(group.conditions, &Condition{value, UnknownComparator, nil})
+
+		if p.SkipSpaces() == '%' {
+			break
+		}
+		logical := p.ReadLogicalOperator()
+		if logical == UnknownLogical {
+			return nil, p.Error("Expecting and/or or end of when tag", start)
+		}
+		group.joins = append(group.joins, logical)
+	}
+	p.Commit()
+	return group, nil
+}
+
 func (p *Parser) Peek() byte {
 	if p.Position == p.End {
 		return 0
