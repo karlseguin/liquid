@@ -22,7 +22,6 @@ The following tags are missing:
 
 Other:
 
-- Support for 'now'
 - Render can generate far less objects
 
 ## Template Cache
