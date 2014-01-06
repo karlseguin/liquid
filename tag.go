@@ -6,7 +6,7 @@ import (
 	"github.com/karlseguin/liquid/tags"
 )
 
-type TagFactory func(*core.Parser) (core.Tag, error)
+type TagFactory func(*core.Parser, *core.Configuration) (core.Tag, error)
 
 var Tags = map[string]TagFactory{
 	"comment":    tags.CommentFactory,
@@ -25,9 +25,10 @@ var Tags = map[string]TagFactory{
 	"case":       tags.CaseFactory,
 	"when":       tags.WhenFactory,
 	"endcase":    tags.EndCaseFactory,
+	"include":    tags.IncludeFactory,
 }
 
-func newTag(p *core.Parser) (core.Tag, error) {
+func newTag(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	start := p.Position
 	p.ForwardBy(2) // skip the {%
 	name := p.ReadName()
@@ -35,5 +36,5 @@ func newTag(p *core.Parser) (core.Tag, error) {
 	if ok == false {
 		return nil, p.Error(fmt.Sprintf("unknown tag %q", name), start)
 	}
-	return factory(p)
+	return factory(p, config)
 }

@@ -32,7 +32,7 @@ func TestAssignForAVariableWithFilters(t *testing.T) {
 
 func assertStringAssign(t *testing.T, parser *core.Parser, variableName, value string) {
 	spec := gspec.New(t)
-	tag, err := AssignFactory(parser)
+	tag, err := AssignFactory(parser, nil)
 	spec.Expect(err).ToBeNil()
 	spec.Expect(tag.Name()).ToEqual("assign")
 	m := make(map[string]interface{})
@@ -42,7 +42,7 @@ func assertStringAssign(t *testing.T, parser *core.Parser, variableName, value s
 
 func assertIntAssign(t *testing.T, parser *core.Parser, variableName string, value int) {
 	spec := gspec.New(t)
-	tag, err := AssignFactory(parser)
+	tag, err := AssignFactory(parser, nil)
 	spec.Expect(err).ToBeNil()
 	spec.Expect(tag.Name()).ToEqual("assign")
 	m := map[string]interface{}{

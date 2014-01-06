@@ -10,7 +10,7 @@ var (
 	endUnless = &End{"unless"}
 )
 
-func UnlessFactory(p *core.Parser) (core.Tag, error) {
+func UnlessFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	condition, err := p.ReadConditionGroup()
 	if err != nil {
 		return nil, err
@@ -20,7 +20,7 @@ func UnlessFactory(p *core.Parser) (core.Tag, error) {
 	return &Unless{NewCommon(), condition, nil}, nil
 }
 
-func EndUnlessFactory(p *core.Parser) (core.Tag, error) {
+func EndUnlessFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	return endUnless, nil
 }
 

@@ -5,7 +5,7 @@ import (
 )
 
 // Creates an assign tag
-func AssignFactory(p *core.Parser) (core.Tag, error) {
+func AssignFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	start := p.Position
 	name := p.ReadName()
 	if len(name) == 0 {

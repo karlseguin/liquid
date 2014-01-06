@@ -18,7 +18,6 @@ The following tags are missing:
 
 - cycle
 - for
-- include
 
 Other:
 
@@ -31,7 +30,7 @@ By default the templates are cached in a pretty dumb cache. That is, once in the
     //OR
     template, _ := liquid.ParseString(someStringTemplate, liquid.NoCache)
 
-Alternatively, you can provide your own `liquid.Cache` implementation which
+Alternatively, you can provide your own `core.Cache` implementation which
 could implement expiry and other custom features.
 
 ## Configuration
@@ -99,6 +98,29 @@ Finally, do note that Filters work with and return `interface{}`. Consider using
 If you're filter works with `string` or `[]byte`, you should handle both `string` and `[]byte` types as you don't know what the user will provide nor what transformation previous filters might apply. Similarly, if you're expecting an array, you should handle both arrays and slices.
 
 Again, look at existing filters for more insight.
+
+## Include
+The include tag is supported by configuring a custom `IncludeHandler`. The handler is responsible for resolving the include. This provides the greatest amount of flexibility: included templates can be loaded from the file system, a database or some other location.
+
+For example, an include handler which loads templates from the filsystem, might look like:
+
+    var config = liquid.Configure().IncludeHandler(includeHandler)
+
+    func main {
+      template, err := liquid.ParseString(..., config)
+      //...
+    }
+
+    // name is equal to the paramter passed to include
+    // data is the data available to the template
+    func includeHandler(name string, data map[string]interface{}) []byte {
+      // not sure if this is good enough, but do be mindful of directory traversal attacks
+      fileName := path.Join("./templates", string.Replace(name, "..", ""))
+      template, err := liquid.ParseFile(fileName, config)
+      return template.Render(data)
+    }
+
+Sadly, include doesn't currently support the more advanced variations, such as specifying a specific value for the include or automatically including in a loop. However, the flexibility provided hopefully suffices for now.
 
 ## Errors
 `Render` shouldn't fail, but it doesn't always stay silent about mistakes. For the sake of helping debug issues, it can inject data within the template. For example, using the output tag such as {{ user.name.first | upcase }} when *user.name.first* doesn't map to valid data will result in the literal "{{user.name.first}}"" being injecting in the template.

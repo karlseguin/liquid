@@ -15,7 +15,7 @@ type IfSibling interface {
 	core.Code
 }
 
-func IfFactory(p *core.Parser) (core.Tag, error) {
+func IfFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	condition, err := p.ReadConditionGroup()
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func IfFactory(p *core.Parser) (core.Tag, error) {
 	return i, nil
 }
 
-func ElseIfFactory(p *core.Parser) (core.Tag, error) {
+func ElseIfFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	condition, err := p.ReadConditionGroup()
 	if err != nil {
 		return nil, err
@@ -39,12 +39,12 @@ func ElseIfFactory(p *core.Parser) (core.Tag, error) {
 	return &ElseIf{NewCommon(), condition}, nil
 }
 
-func ElseFactory(p *core.Parser) (core.Tag, error) {
+func ElseFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	p.SkipPastTag()
 	return &Else{NewCommon(), new(core.TrueCondition)}, nil
 }
 
-func EndIfFactory(p *core.Parser) (core.Tag, error) {
+func EndIfFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	return endIf, nil
 }
 

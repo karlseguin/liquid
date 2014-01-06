@@ -1,29 +1,24 @@
 package liquid
 
 import (
+	"github.com/karlseguin/liquid/core"
 	"sync"
 )
 
-type Cache interface {
-	Get(key string) *Template
-	Set(key string, template *Template)
-	Clear()
-}
-
-var TemplateCache = &SimpleCache{lookup: make(map[string]*Template)}
+var TemplateCache = &SimpleCache{lookup: make(map[string]core.Code)}
 
 type SimpleCache struct {
 	sync.RWMutex
-	lookup map[string]*Template
+	lookup map[string]core.Code
 }
 
-func (c *SimpleCache) Get(key string) *Template {
+func (c *SimpleCache) Get(key string) core.Code {
 	c.RLock()
 	defer c.RUnlock()
 	return c.lookup[key]
 }
 
-func (c *SimpleCache) Set(key string, template *Template) {
+func (c *SimpleCache) Set(key string, template core.Code) {
 	c.Lock()
 	defer c.Unlock()
 	c.lookup[key] = template
@@ -32,5 +27,5 @@ func (c *SimpleCache) Set(key string, template *Template) {
 func (c *SimpleCache) Clear() {
 	c.Lock()
 	defer c.Unlock()
-	c.lookup = make(map[string]*Template)
+	c.lookup = make(map[string]core.Code)
 }

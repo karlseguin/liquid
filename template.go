@@ -31,36 +31,37 @@ func (t *Template) Name() string {
 }
 
 // Parse the bytes into a Liquid template
-func Parse(data []byte, config *Configuration) (*Template, error) {
+func Parse(data []byte, config *core.Configuration) (*Template, error) {
 	if config == nil {
 		config = defaultConfig
 	}
-	if config.cache == nil {
-		return buildTemplate(data)
+	cache := config.GetCache()
+	if cache == nil {
+		return buildTemplate(data, config)
 	}
 	hasher := sha1.New()
 	hasher.Write(data)
 	key := fmt.Sprintf("%x", hasher.Sum(nil))
 
-	template := config.cache.Get(key)
+	template := cache.Get(key)
 	if template == nil {
 		var err error
-		template, err = buildTemplate(data)
+		template, err = buildTemplate(data, config)
 		if err != nil {
 			return nil, err
 		}
-		config.cache.Set(key, template)
+		cache.Set(key, template)
 	}
-	return template, nil
+	return template.(*Template), nil
 }
 
 // Parse the string into a liquid template
-func ParseString(data string, config *Configuration) (*Template, error) {
+func ParseString(data string, config *core.Configuration) (*Template, error) {
 	return Parse([]byte(data), config)
 }
 
 // Turn the contents of the specified file into a liquid template
-func ParseFile(path string, config *Configuration) (*Template, error) {
+func ParseFile(path string, config *core.Configuration) (*Template, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -79,16 +80,16 @@ func (t *Template) Render(data map[string]interface{}) []byte {
 	return buffer.Bytes()
 }
 
-func buildTemplate(data []byte) (*Template, error) {
+func buildTemplate(data []byte, config *core.Configuration) (*Template, error) {
 	parser := core.NewParser(data)
 	template := new(Template)
-	if err := extractTokens(parser, template); err != nil {
+	if err := extractTokens(parser, template, config); err != nil {
 		return nil, err
 	}
 	return template, nil
 }
 
-func extractTokens(parser *core.Parser, container core.Tag) error {
+func extractTokens(parser *core.Parser, container core.Tag, config *core.Configuration) error {
 	stack := make([]core.Tag, 0, 0)
 	parentContainer := container
 	for parser.HasMore() {
@@ -106,7 +107,7 @@ func extractTokens(parser *core.Parser, container core.Tag) error {
 			}
 		} else if markupType == core.TagMarkup {
 			start := parser.Position
-			tag, err := newTag(parser)
+			tag, err := newTag(parser, config)
 			if err != nil {
 				return err
 			}

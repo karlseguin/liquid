@@ -8,12 +8,12 @@ import (
 
 var endCapture = &End{"capture"}
 
-func EndCaptureFactory(p *core.Parser) (core.Tag, error) {
+func EndCaptureFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	return endCapture, nil
 }
 
 // Creates an assign tag
-func CaptureFactory(p *core.Parser) (core.Tag, error) {
+func CaptureFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	start := p.Position
 	name := p.ReadName()
 	if len(name) == 0 {

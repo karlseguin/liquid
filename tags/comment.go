@@ -8,7 +8,7 @@ var comment = new(Comment)
 var endComment = &End{"comment"}
 
 // Special handling to just quickly skip over it all
-func CommentFactory(p *core.Parser) (core.Tag, error) {
+func CommentFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	openTags := 1
 	for {
 		_, markupType := p.ToMarkup()
@@ -33,7 +33,7 @@ func CommentFactory(p *core.Parser) (core.Tag, error) {
 	return comment, nil
 }
 
-func EndCommentFactory(p *core.Parser) (core.Tag, error) {
+func EndCommentFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	return endComment, nil
 }
 

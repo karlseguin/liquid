@@ -16,7 +16,7 @@ type CaseSibling interface {
 	core.Code
 }
 
-func CaseFactory(p *core.Parser) (core.Tag, error) {
+func CaseFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	value, err := p.ReadValue()
 	if err != nil {
 		return nil, err
@@ -25,7 +25,7 @@ func CaseFactory(p *core.Parser) (core.Tag, error) {
 	return &Case{value, make([]CaseSibling, 0, 5)}, nil
 }
 
-func WhenFactory(p *core.Parser) (core.Tag, error) {
+func WhenFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	condition, err := p.ReadPartialCondition()
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func WhenFactory(p *core.Parser) (core.Tag, error) {
 	return &When{NewCommon(), condition}, nil
 }
 
-func EndCaseFactory(p *core.Parser) (core.Tag, error) {
+func EndCaseFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	return endCase, nil
 }
 

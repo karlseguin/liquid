@@ -7,7 +7,7 @@ import (
 var endRaw = &End{"raw"}
 
 // Special handling to just quickly skip over it all
-func RawFactory(p *core.Parser) (core.Tag, error) {
+func RawFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	p.SkipPastTag()
 	start := p.Position
 	end := start
@@ -30,7 +30,7 @@ func RawFactory(p *core.Parser) (core.Tag, error) {
 	return &Raw{p.Data[start:end]}, nil
 }
 
-func EndRawFactory(p *core.Parser) (core.Tag, error) {
+func EndRawFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	return endRaw, nil
 }
 
