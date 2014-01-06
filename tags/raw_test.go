@@ -1,6 +1,7 @@
 package tags
 
 import (
+	"bytes"
 	"github.com/karlseguin/gspec"
 	"testing"
 )
@@ -27,5 +28,8 @@ func TestRawTagRenders(t *testing.T) {
 	spec := gspec.New(t)
 	parser := newParser(" %} this {{}} {%} is raw {%endraw%}Z")
 	tag, _ := RawFactory(parser, nil)
-	spec.Expect(string(tag.Render(nil))).ToEqual(" this {{}} {%} is raw ")
+
+	writer := new(bytes.Buffer)
+	tag.Render(writer, nil)
+	spec.Expect(writer.String()).ToEqual(" this {{}} {%} is raw ")
 }

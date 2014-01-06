@@ -2,10 +2,10 @@
 package liquid
 
 import (
-	"bytes"
 	"crypto/sha1"
 	"fmt"
 	"github.com/karlseguin/liquid/core"
+	"io"
 	"io/ioutil"
 )
 
@@ -69,15 +69,13 @@ func ParseFile(path string, config *core.Configuration) (*Template, error) {
 	return Parse(data, config)
 }
 
-func (t *Template) Render(data map[string]interface{}) []byte {
+func (t *Template) Render(writer io.Writer, data map[string]interface{}) {
 	if data == nil {
 		data = make(map[string]interface{})
 	}
-	buffer := new(bytes.Buffer)
 	for _, code := range t.Code {
-		buffer.Write(code.Render(data))
+		code.Render(writer, data)
 	}
-	return buffer.Bytes()
 }
 
 func buildTemplate(data []byte, config *core.Configuration) (*Template, error) {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/karlseguin/liquid/core"
+	"io"
 )
 
 var (
@@ -55,13 +56,13 @@ func (c *Case) AddSibling(tag core.Tag) error {
 	return nil
 }
 
-func (c *Case) Render(data map[string]interface{}) []byte {
+func (c *Case) Render(writer io.Writer, data map[string]interface{}) {
 	for _, condition := range c.conditions {
 		if condition.Condition().IsTrue(data) {
-			return condition.Render(data)
+			condition.Render(writer, data)
+			return
 		}
 	}
-	return nil
 }
 
 func (c *Case) Name() string {

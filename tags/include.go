@@ -2,6 +2,7 @@ package tags
 
 import (
 	"github.com/karlseguin/liquid/core"
+	"io"
 )
 
 // Creates an include tag
@@ -31,11 +32,10 @@ func (i *Include) AddSibling(tag core.Tag) error {
 	panic("AddSibling should not have been called on a Include")
 }
 
-func (i *Include) Render(data map[string]interface{}) []byte {
-	if i.handler == nil {
-		return nil
+func (i *Include) Render(writer io.Writer, data map[string]interface{}) {
+	if i.handler != nil {
+		i.handler(core.ToString(i.value.Resolve(data)), writer, data)
 	}
-	return i.handler(core.ToString(i.value.Resolve(data)), data)
 }
 
 func (i *Include) Name() string {

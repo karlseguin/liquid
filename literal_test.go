@@ -1,12 +1,20 @@
 package liquid
 
 import (
-	"github.com/karlseguin/gspec"
+	"bytes"
+	"github.com/karlseguin/liquid/core"
 	"testing"
 )
 
 func TestLiteralRendersItself(t *testing.T) {
-	spec := gspec.New(t)
 	literal := newLiteral([]byte("it's over 9001"))
-	spec.Expect(string(literal.Render(nil))).ToEqual("it's over 9001")
+	assertRender(t, literal, nil, "it's over 9001")
+}
+
+func assertRender(t *testing.T, code core.Code, d map[string]interface{}, expected string) {
+	writer := new(bytes.Buffer)
+	code.Render(writer, d)
+	if writer.String() != expected {
+		t.Errorf("Expecting %q, got %q", expected, writer.String())
+	}
 }

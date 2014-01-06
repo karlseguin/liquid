@@ -22,24 +22,18 @@ func TestOutputHandlesSpaceOnlyOutput(t *testing.T) {
 }
 
 func TestOutputExtractsASimpleStatic(t *testing.T) {
-	spec := gspec.New(t)
-	output, err := newOutput(core.NewParser([]byte("{{  'over 9000'}}")))
-	spec.Expect(string(output.Render(nil))).ToEqual("over 9000")
-	spec.Expect(err).ToBeNil()
+	output, _ := newOutput(core.NewParser([]byte("{{  'over 9000'}}")))
+	assertRender(t, output, nil, "over 9000")
 }
 
 func TestOutputExtractsAComplexStatic(t *testing.T) {
-	spec := gspec.New(t)
-	output, err := newOutput(core.NewParser([]byte("{{'it\\'s over \\9000'}}")))
-	spec.Expect(string(output.Render(nil))).ToEqual("it's over \\9000")
-	spec.Expect(err).ToBeNil()
+	output, _ := newOutput(core.NewParser([]byte("{{'it\\'s over \\9000'}}")))
+	assertRender(t, output, nil, "it's over \\9000")
 }
 
 func TestOutputExtractsAStaticWithAnEndingQuote(t *testing.T) {
-	spec := gspec.New(t)
-	output, err := newOutput(core.NewParser([]byte("{{'it\\''}}")))
-	spec.Expect(string(output.Render(nil))).ToEqual("it'")
-	spec.Expect(err).ToBeNil()
+	output, _ := newOutput(core.NewParser([]byte("{{'it\\''}}")))
+	assertRender(t, output, nil, "it'")
 }
 
 func TestOutputExtractionGivesErrorForUnclosedStatic(t *testing.T) {

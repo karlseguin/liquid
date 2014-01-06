@@ -13,5 +13,5 @@ var (
 // Entry into the fluent-configuration
 func Configure() *core.Configuration {
 	c := new(core.Configuration)
-	return c.Cache(TemplateCache)
+	return c.SetInternalBuffer(512, 4096).Cache(TemplateCache)
 }

@@ -5,7 +5,9 @@
     data := map[string]interface{
       "name": "leto",
     }
-    println(template.Render(data))
+    writer := new(bytes.Buffer)
+    template.Render(writer, data)
+    return writer.String()
 
 Given a file path, liquid can also `ParseFile`. Give a `[]byte` it can also simply `Parse`.
 
@@ -36,7 +38,9 @@ could implement expiry and other custom features.
 ## Configuration
 As seen above, a configuration can be provided when generating a template. Configuration is achieved via a fluent-interface. Configurable options are:
 
-- `Cache(cache liquid.Cache)`: the caching implementation to use. This defaults to `liquid.SimpleCache`, which is thread-safe.
+- `Cache(cache core.Cache)`: the caching implementation to use. This defaults to `liquid.SimpleCache`, which is thread-safe.
+- `IncludeHandler(handler core.IncludeHandler)`: the callback used for handling includes. By default, includes are ignored. See below for more information.
+- `SetInternalBuffer(count, size int)`: the number of internal buffers and the maximum size of each buffer to use. Defaults to 512 and 4KB. This is currently only used for the capture tag. If you need to capture more than 4KB, increase the 2nd value.
 
 ## Data Binding
 The template's `Render` method takes a `map[string]interface{}` as its argument. Beyond that, `Render` works on all built-in types, and will also reflect the exported fields of a struct.
@@ -47,7 +51,7 @@ The template's `Render` method takes a `map[string]interface{}` as its argument.
     }
 
     t, _ := liquid.ParseString("{{ user.manager.name }}", nil)
-    t.Render(map[string]interface{}{
+    t.Render(os.Stdout, map[string]interface{}{
       "user": &User{"Duncan", &User{"Leto", nil}},
     })
 
@@ -113,11 +117,11 @@ For example, an include handler which loads templates from the filsystem, might 
 
     // name is equal to the paramter passed to include
     // data is the data available to the template
-    func includeHandler(name string, data map[string]interface{}) []byte {
+    func includeHandler(name string, writer io.Writer, data map[string]interface{}) {
       // not sure if this is good enough, but do be mindful of directory traversal attacks
       fileName := path.Join("./templates", string.Replace(name, "..", ""))
-      template, err := liquid.ParseFile(fileName, config)
-      return template.Render(data)
+      template, _ := liquid.ParseFile(fileName, config)
+      template.Render(writer, data)
     }
 
 Sadly, include doesn't currently support the more advanced variations, such as specifying a specific value for the include or automatically including in a loop. However, the flexibility provided hopefully suffices for now.

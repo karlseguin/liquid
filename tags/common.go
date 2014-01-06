@@ -1,8 +1,8 @@
 package tags
 
 import (
-	"bytes"
 	"github.com/karlseguin/liquid/core"
+	"io"
 )
 
 type Common struct {
@@ -19,10 +19,8 @@ func (c *Common) AddCode(code core.Code) {
 	c.Code = append(c.Code, code)
 }
 
-func (c *Common) Render(data map[string]interface{}) []byte {
-	buffer := new(bytes.Buffer)
+func (c *Common) Render(writer io.Writer, data map[string]interface{}) {
 	for _, code := range c.Code {
-		buffer.Write(code.Render(data))
+		code.Render(writer, data)
 	}
-	return buffer.Bytes()
 }

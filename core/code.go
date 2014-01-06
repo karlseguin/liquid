@@ -1,6 +1,10 @@
 package core
 
+import (
+	"io"
+)
+
 // interface for something that can render itself
 type Code interface {
-	Render(data map[string]interface{}) []byte
+	Render(writer io.Writer, data map[string]interface{})
 }

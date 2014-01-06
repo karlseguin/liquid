@@ -2,6 +2,7 @@ package tags
 
 import (
 	"github.com/karlseguin/liquid/core"
+	"io"
 )
 
 var endRaw = &End{"raw"}
@@ -48,8 +49,8 @@ func (r *Raw) AddSibling(tag core.Tag) error {
 	panic("AddSibling should not have been called on a Raw")
 }
 
-func (r *Raw) Render(data map[string]interface{}) []byte {
-	return r.value
+func (r *Raw) Render(writer io.Writer, data map[string]interface{}) {
+	writer.Write(r.value)
 }
 
 func (r *Raw) Name() string {

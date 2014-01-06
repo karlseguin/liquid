@@ -2,6 +2,7 @@ package tags
 
 import (
 	"github.com/karlseguin/liquid/core"
+	"io"
 )
 
 // Creates an assign tag
@@ -41,7 +42,7 @@ func (a *Assign) AddSibling(tag core.Tag) error {
 	panic("AddSibling should not have been called on a Assign")
 }
 
-func (a *Assign) Render(data map[string]interface{}) []byte {
+func (a *Assign) Render(writer io.Writer, data map[string]interface{}) {
 	value := a.value.Resolve(data)
 	if a.filters != nil {
 		for _, filter := range a.filters {
@@ -49,7 +50,6 @@ func (a *Assign) Render(data map[string]interface{}) []byte {
 		}
 	}
 	data[a.name] = value
-	return nil
 }
 
 func (a *Assign) Name() string {

@@ -2,6 +2,7 @@ package liquid
 
 import (
 	"github.com/karlseguin/liquid/core"
+	"io"
 )
 
 type Output struct {
@@ -9,14 +10,14 @@ type Output struct {
 	Filters []core.Filter
 }
 
-func (o *Output) Render(data map[string]interface{}) []byte {
+func (o *Output) Render(writer io.Writer, data map[string]interface{}) {
 	value := o.Value.Resolve(data)
 	if o.Filters != nil {
 		for _, filter := range o.Filters {
 			value = filter(value, data)
 		}
 	}
-	return core.ToBytes(value)
+	writer.Write(core.ToBytes(value))
 }
 
 func newOutput(p *core.Parser) (core.Code, error) {

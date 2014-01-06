@@ -2,6 +2,7 @@ package tags
 
 import (
 	"github.com/karlseguin/liquid/core"
+	"io"
 )
 
 // a generic end tag
@@ -17,7 +18,7 @@ func (e *End) AddSibling(tag core.Tag) error {
 	panic("AddSibling should not have been called on an end tag")
 }
 
-func (e *End) Render(data map[string]interface{}) []byte {
+func (e *End) Render(writer io.Writer, data map[string]interface{}) {
 	panic("Render should not have been called on an end tag")
 }
 

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/karlseguin/liquid/core"
+	"io"
 )
 
 var endCapture = &End{"capture"}
@@ -20,11 +21,12 @@ func CaptureFactory(p *core.Parser, config *core.Configuration) (core.Tag, error
 		return nil, p.Error("Invalid assignment, variable not found. ", start)
 	}
 	p.SkipPastTag()
-	return &Capture{name, NewCommon()}, nil
+	return &Capture{name, config, NewCommon()}, nil
 }
 
 type Capture struct {
-	name string
+	name   string
+	config *core.Configuration
 	*Common
 }
 
@@ -32,9 +34,11 @@ func (c *Capture) AddSibling(tag core.Tag) error {
 	return errors.New(fmt.Sprintf("%q tag does not belong directly within a capture", tag.Name()))
 }
 
-func (c *Capture) Render(data map[string]interface{}) []byte {
-	data[c.name] = c.Common.Render(data)
-	return nil
+func (c *Capture) Render(w io.Writer, data map[string]interface{}) {
+	writer := c.config.GetWriter()
+	defer writer.Close()
+	c.Common.Render(writer, data)
+	data[c.name] = writer.Bytes()
 }
 
 func (c *Capture) Name() string {

@@ -2,6 +2,7 @@ package tags
 
 import (
 	"github.com/karlseguin/liquid/core"
+	"io"
 )
 
 var comment = new(Comment)
@@ -51,7 +52,7 @@ func (c *Comment) AddSibling(tag core.Tag) error {
 	panic("AddSibling should not have been called on a comment")
 }
 
-func (c *Comment) Render(data map[string]interface{}) []byte {
+func (c *Comment) Render(writer io.Writer, data map[string]interface{}) {
 	panic("Render should not have been called on a comment")
 }
 
