@@ -13,13 +13,12 @@ var (
 )
 
 func ForFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
-	start := p.Position
 	name := p.ReadName()
 	if len(name) == 0 {
-		return nil, p.Error("Invalid variable name in for tag", start)
+		return nil, p.Error("Invalid variable name in for tag")
 	}
 	if p.SkipSpaces() != 'i' || p.Left() < 3 || p.Data[p.Position+1] != 'n' || !core.IsTokenEnd(p.Data[p.Position+2]) {
-		return nil, p.Error("Expecting keyword 'in' after variable name in for tag", start)
+		return nil, p.Error("Expecting keyword 'in' after variable name in for tag")
 	}
 	p.ForwardBy(2)
 
@@ -43,7 +42,7 @@ func ForFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 		}
 		if name == "limit" {
 			if p.SkipUntil(':') != ':' {
-				return nil, p.Error("Expecting ':' after limit in for tag", start)
+				return nil, p.Error("Expecting ':' after limit in for tag")
 			}
 			p.Forward()
 			limit, err := p.ReadValue()
@@ -53,7 +52,7 @@ func ForFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 			f.limit = limit
 		} else if name == "offset" {
 			if p.SkipUntil(':') != ':' {
-				return nil, p.Error("Expecting ':' after offset in for tag", start)
+				return nil, p.Error("Expecting ':' after offset in for tag")
 			}
 			p.Forward()
 			offset, err := p.ReadValue()
@@ -64,7 +63,7 @@ func ForFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 		} else if name == "reverse" {
 			f.reverse = true
 		} else {
-			return nil, p.Error(fmt.Sprint("%q is an inknown modifier in for tag", name), start)
+			return nil, p.Error(fmt.Sprint("%q is an inknown modifier in for tag", name))
 		}
 	}
 	p.SkipPastTag()

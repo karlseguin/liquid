@@ -7,13 +7,12 @@ import (
 
 // Creates an include tag
 func IncludeFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
-	start := p.Position
 	value, err := p.ReadValue()
 	if err != nil {
 		return nil, err
 	}
 	if value == nil {
-		return nil, p.Error("Invalid include value", start)
+		return nil, p.Error("Invalid include value")
 	}
 	p.SkipPastTag()
 	return &Include{value, config.GetIncludeHandler()}, nil

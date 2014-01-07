@@ -20,21 +20,19 @@ const (
 )
 
 type Parser struct {
-	Position       int
-	Data           []byte
-	Len            int
-	End            int
-	UncommitedLine int
-	Line           int
+	Position int
+	Data     []byte
+	Len      int
+	End      int
+	Line     int
 }
 
 func NewParser(data []byte) *Parser {
 	parser := &Parser{
-		Position:       0,
-		Data:           data,
-		Len:            len(data),
-		Line:           1,
-		UncommitedLine: 1,
+		Position: 0,
+		Data:     data,
+		Len:      len(data),
+		Line:     1,
 	}
 	parser.End = parser.Len - 1
 	return parser
@@ -61,7 +59,6 @@ func (p *Parser) ToMarkup() ([]byte, MarkupType) {
 	if p.Position > start {
 		pre = p.Data[start:p.Position]
 	}
-	p.Commit()
 	return detach(pre), markupType
 }
 
@@ -93,7 +90,6 @@ func (p *Parser) SkipSpaces() (current byte) {
 			break
 		}
 	}
-	p.Commit()
 	return
 }
 
@@ -139,9 +135,8 @@ func (p *Parser) ReadStaticStringValue(delimiter byte) (Value, error) {
 	}
 
 	if found == false {
-		return nil, p.Error("Invalid value, a single quote might be missing", start)
+		return nil, p.Error("Invalid value, a single quote might be missing")
 	}
-	p.Commit()
 	var data string
 	if escaped > 0 {
 		data = string(unescape(p.Data[start:p.Position-1], escaped))
@@ -152,17 +147,16 @@ func (p *Parser) ReadStaticStringValue(delimiter byte) (Value, error) {
 }
 
 func (p *Parser) ReadRangeValue() (Value, error) {
-	start := p.Position
 	p.Forward() //consume the opening (
 	from, err := p.ReadValue()
 	if err != nil {
 		return nil, err
 	}
 	if from == nil {
-		return nil, p.Error("Invalid range, should start with a number of variable", start)
+		return nil, p.Error("Invalid range, should start with a number of variable")
 	}
 	if p.SkipUntil('.') != '.' || p.Left() < 2 || p.Data[p.Position+1] != '.' {
-		return nil, p.Error("Invalid range, expecting '..' between two values", start)
+		return nil, p.Error("Invalid range, expecting '..' between two values")
 	}
 	p.ForwardBy(2)
 	to, err := p.ReadValue()
@@ -170,20 +164,18 @@ func (p *Parser) ReadRangeValue() (Value, error) {
 		return nil, err
 	}
 	if to == nil {
-		return nil, p.Error("Invalid range, should end with a number of variable", start)
+		return nil, p.Error("Invalid range, should end with a number of variable")
 	}
 
 	if p.SkipUntil(')') != ')' {
-		return nil, p.Error("Invalid range, expecting a close ')'", start)
+		return nil, p.Error("Invalid range, expecting a close ')'")
 	}
 	p.Forward()
-	p.Commit()
 	return &RangeValue{from, to}, nil
 }
 
 func (p *Parser) ReadStaticNumericValue() (Value, error) {
 	hasDecimal := false
-	start := p.Position
 	var value string
 	p.SkipSpaces()
 	marker := p.Position
@@ -203,7 +195,7 @@ func (p *Parser) ReadStaticNumericValue() (Value, error) {
 		break
 	}
 	if len(value) == 0 {
-		return nil, p.Error("Was expecting a value, got nothing", start)
+		return nil, p.Error("Was expecting a value, got nothing")
 	}
 	if i, err := strconv.Atoi(value); err == nil {
 		return &StaticIntValue{i}, nil
@@ -211,7 +203,7 @@ func (p *Parser) ReadStaticNumericValue() (Value, error) {
 	if f, err := strconv.ParseFloat(value, 64); err == nil {
 		return &StaticFloatValue{f}, nil
 	}
-	return nil, p.Error("Invalid value. It looked like a number but could not be convert", start)
+	return nil, p.Error("Invalid value. It looked like a number but could not be convert")
 }
 
 func (p *Parser) ReadStaticBoolValue() (Value, bool) {
@@ -256,8 +248,6 @@ func (p *Parser) ReadDynamicValues() (Value, error) {
 			break
 		}
 	}
-	// fmt.Println(values)
-	p.Commit()
 	return NewDynamicValue(TrimStrings(values)), nil
 }
 
@@ -272,7 +262,6 @@ func (p *Parser) ReadName() string {
 			break
 		}
 	}
-	p.Commit()
 	return name
 }
 
@@ -293,7 +282,6 @@ func (p *Parser) ReadParameters() ([]Value, error) {
 		}
 		break
 	}
-	p.Commit()
 	return TrimValues(values), nil
 }
 
@@ -303,12 +291,11 @@ func (p *Parser) ReadFilters() ([]Filter, error) {
 		return filters, nil
 	}
 	p.Forward()
-	start := p.Position
 	filters = make([]Filter, 0, 5)
 	for name := p.ReadName(); name != ""; name = p.ReadName() {
 		factory, exists := FilterLookup[name]
 		if exists == false {
-			return nil, p.Error(fmt.Sprintf("Unknown filter %q", name), start)
+			return nil, p.Error(fmt.Sprintf("Unknown filter %q", name))
 		}
 		var parameters []Value
 		if p.SkipSpaces() == ':' {
@@ -326,12 +313,10 @@ func (p *Parser) ReadFilters() ([]Filter, error) {
 		}
 		break
 	}
-	p.Commit()
 	return filters, nil
 }
 
 func (p *Parser) ReadConditionGroup() (Verifiable, error) {
-	start := p.Position
 	group := &ConditionGroup{make([]*Condition, 0, 2), make([]LogicalOperator, 0, 1), false}
 	for {
 		left, err := p.ReadValue()
@@ -339,7 +324,7 @@ func (p *Parser) ReadConditionGroup() (Verifiable, error) {
 			return nil, err
 		}
 		if left == nil {
-			return nil, p.Error("Invalid of missing left value in condition", start)
+			return nil, p.Error("Invalid of missing left value in condition")
 		}
 
 		if p.SkipSpaces() == '%' {
@@ -350,7 +335,7 @@ func (p *Parser) ReadConditionGroup() (Verifiable, error) {
 		if operator == UnknownComparator {
 			logical := p.ReadLogicalOperator()
 			if logical == UnknownLogical {
-				return nil, p.Error("Invalid or missing operator (should be ==, !=, >, <, >=, <= or contains)", start)
+				return nil, p.Error("Invalid or missing operator (should be ==, !=, >, <, >=, <= or contains)")
 			}
 			group.conditions = append(group.conditions, &Condition{left, Unary, nil})
 			group.joins = append(group.joins, logical)
@@ -362,7 +347,7 @@ func (p *Parser) ReadConditionGroup() (Verifiable, error) {
 			return nil, err
 		}
 		if right == nil {
-			return nil, p.Error("Invalid of missing right value in condition", start)
+			return nil, p.Error("Invalid of missing right value in condition")
 		}
 		group.conditions = append(group.conditions, &Condition{left, operator, right})
 
@@ -372,11 +357,10 @@ func (p *Parser) ReadConditionGroup() (Verifiable, error) {
 
 		logical := p.ReadLogicalOperator()
 		if logical == UnknownLogical {
-			return nil, p.Error("Invalid condition. Expecting 'and', 'or' or end of tag", start)
+			return nil, p.Error("Invalid condition. Expecting 'and', 'or' or end of tag")
 		}
 		group.joins = append(group.joins, logical)
 	}
-	p.Commit()
 	return group, nil
 }
 
@@ -439,7 +423,6 @@ func (p *Parser) ReadLogicalOperator() LogicalOperator {
 }
 
 func (p *Parser) ReadPartialCondition() (Completable, error) {
-	start := p.Position
 	group := &ConditionGroup{make([]*Condition, 0, 2), make([]LogicalOperator, 0, 1), false}
 	for {
 		value, err := p.ReadValue()
@@ -447,7 +430,7 @@ func (p *Parser) ReadPartialCondition() (Completable, error) {
 			return nil, err
 		}
 		if value == nil {
-			return nil, p.Error("Invalid of missing value for condition", start)
+			return nil, p.Error("Invalid of missing value for condition")
 		}
 		group.conditions = append(group.conditions, &Condition{value, UnknownComparator, nil})
 
@@ -456,11 +439,10 @@ func (p *Parser) ReadPartialCondition() (Completable, error) {
 		}
 		logical := p.ReadLogicalOperator()
 		if logical == UnknownLogical {
-			return nil, p.Error("Invalid condition. Expecting 'and', 'or' or end of tag", start)
+			return nil, p.Error("Invalid condition. Expecting 'and', 'or' or end of tag")
 		}
 		group.joins = append(group.joins, logical)
 	}
-	p.Commit()
 	return group, nil
 }
 
@@ -481,13 +463,9 @@ func (p *Parser) HasMore() bool {
 func (p *Parser) Current() byte {
 	current := p.Data[p.Position]
 	if current == '\n' {
-		p.UncommitedLine++
+		p.Line++
 	}
 	return current
-}
-
-func (p *Parser) Commit() {
-	p.Line = p.UncommitedLine
 }
 
 func (p *Parser) Forward() {
@@ -505,12 +483,38 @@ func (p *Parser) SkipUntil(b byte) (current byte) {
 			break
 		}
 	}
-	p.Commit()
 	return
 }
 
-func (p *Parser) Error(s string, start int) error {
-	return errors.New(fmt.Sprintf("%s (%q - line %d)", s, p.Snapshot(start), p.Line))
+func (p *Parser) Error(s string) error {
+	end := p.Position
+	if end == p.Len {
+		end--
+	} else {
+		for ; end < p.Len; end++ {
+			if p.Data[end] == '}' {
+				if end < p.End && p.Data[end+1] == '}' {
+					end++
+				}
+				break
+			}
+		}
+	}
+
+	start := end - 25
+	if start < 0 {
+		start = 0
+	}
+	line := p.Line
+	for i := end; i > 0; i-- {
+		if p.Data[i] == '\n' {
+			line--
+		} else if p.Data[i] == '{' || p.Data[i] == '%' && p.Data[i-1] == '{' {
+			start = i - 1
+			break
+		}
+	}
+	return errors.New(fmt.Sprintf("%s (%q - line %d)", s, string(p.Data[start:end+1]), line))
 }
 
 func (p *Parser) Snapshot(start int) []byte {

@@ -15,10 +15,9 @@ func EndCaptureFactory(p *core.Parser, config *core.Configuration) (core.Tag, er
 
 // Creates an assign tag
 func CaptureFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
-	start := p.Position
 	name := p.ReadName()
 	if len(name) == 0 {
-		return nil, p.Error("Invalid assignment, variable not found. ", start)
+		return nil, p.Error("Invalid assignment, variable not found. ")
 	}
 	p.SkipPastTag()
 	return &Capture{name, config, NewCommon()}, nil

@@ -31,12 +31,11 @@ var Tags = map[string]TagFactory{
 }
 
 func newTag(p *core.Parser, config *core.Configuration) (core.Tag, error) {
-	start := p.Position
 	p.ForwardBy(2) // skip the {%
 	name := p.ReadName()
 	factory, ok := Tags[name]
 	if ok == false {
-		return nil, p.Error(fmt.Sprintf("unknown tag %q", name), start)
+		return nil, p.Error(fmt.Sprintf("unknown tag %q", name))
 	}
 	return factory(p, config)
 }

@@ -104,7 +104,6 @@ func extractTokens(parser *core.Parser, container core.Tag, config *core.Configu
 				container.AddCode(code)
 			}
 		} else if markupType == core.TagMarkup {
-			start := parser.Position
 			tag, err := newTag(parser, config)
 			if err != nil {
 				return err
@@ -117,7 +116,7 @@ func extractTokens(parser *core.Parser, container core.Tag, config *core.Configu
 				parentContainer = tag
 			case core.EndTag:
 				if tag.Name() != parentContainer.Name() {
-					return parser.Error("unexpected end tag", start)
+					return parser.Error("unexpected end tag")
 				}
 				l := len(stack) - 1
 				container = stack[l]

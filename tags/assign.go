@@ -7,13 +7,12 @@ import (
 
 // Creates an assign tag
 func AssignFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
-	start := p.Position
 	name := p.ReadName()
 	if len(name) == 0 {
-		return nil, p.Error("Invalid variable name in assign tag", start)
+		return nil, p.Error("Invalid variable name in assign tag")
 	}
 	if p.SkipUntil('=') != '=' {
-		return nil, p.Error("Invalid assign, missing '=' ", start)
+		return nil, p.Error("Invalid assign, missing '=' ")
 	}
 	p.Forward()
 	value, err := p.ReadValue()
