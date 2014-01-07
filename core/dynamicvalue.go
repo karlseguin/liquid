@@ -88,8 +88,8 @@ func indexedValue(container interface{}, index interface{}) interface{} {
 	value := reflect.ValueOf(container)
 	kind := value.Kind()
 	if kind == reflect.Array || kind == reflect.Slice || kind == reflect.String {
-		if n, ok := ToInt(index); ok && n < value.Len() {
-			return value.Index(n).Interface()
+		if n, ok := ToInt(index); ok && n <= value.Len() && n > 0 {
+			return value.Index(n-1).Interface()
 		}
 	} else if kind == reflect.Map {
 		indexValue := reflect.ValueOf(index)

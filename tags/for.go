@@ -122,7 +122,6 @@ func (f *For) Render(writer io.Writer, data map[string]interface{}) {
 				}
 			}
 		}
-		println(state.offset, state.Length)
 
 		defer f.loopTeardown(state)
 		if kind == reflect.Map {
