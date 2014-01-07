@@ -194,7 +194,7 @@ func (p *Parser) ReadStaticNumericValue() (Value, error) {
 		}
 		if current == '.' {
 			next := p.Peek()
-			if next <= '9' && next >= '0' && !hasDecimal{
+			if next <= '9' && next >= '0' && !hasDecimal {
 				hasDecimal = true
 				continue
 			}
@@ -256,8 +256,9 @@ func (p *Parser) ReadDynamicValues() (Value, error) {
 			break
 		}
 	}
+	// fmt.Println(values)
 	p.Commit()
-	return &DynamicValue{TrimStrings(values)}, nil
+	return NewDynamicValue(TrimStrings(values)), nil
 }
 
 func (p *Parser) ReadName() string {

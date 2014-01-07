@@ -19,11 +19,6 @@ The following filters are missing:
 The following tags are missing:
 
 - cycle
-- for
-
-Other:
-
-- Render can generate far less objects
 
 ## Template Cache
 By default the templates are cached in a pretty dumb cache. That is, once in the cache, items stay in the cache (there's no expiry). The cache can be disabled, on a per-template basis, via:

@@ -197,7 +197,7 @@ func floatValue(f float64) Value {
 }
 
 func dynamicValue(s string) Value {
-	return &DynamicValue{[]string{s}}
+	return NewDynamicValue([]string{s})
 }
 
 func emptyValue() Value {

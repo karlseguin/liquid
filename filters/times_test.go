@@ -92,7 +92,7 @@ func floatValue(f float64) core.Value {
 }
 
 func dynamicValue(s string) core.Value {
-	return &core.DynamicValue{strings.Split(s, ".")}
+	return core.NewDynamicValue(strings.Split(s, "."))
 }
 
 func params(values ...interface{}) map[string]interface{} {
