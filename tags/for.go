@@ -147,40 +147,69 @@ func (f *For) Type() core.TagType {
 }
 
 func (f *For) iterateArray(state *LoopState, value reflect.Value, isString bool) {
-	length, data, writer := state.Length, state.data, state.writer
-	for i := 0; i < length; i++ {
-		f.loopIteration(state, i)
-		offsetI := i + state.offset
-		item := value.Index(offsetI).Interface()
-		if isString {
-			item = string(item.(uint8))
+	length := state.Length
+	if f.reverse {
+		for i := length - 1; i >= 0; i-- {
+			f.iterateArrayIndex(i, state, value, isString)
 		}
-		data[f.name] = item
-		f.Common.Render(writer, data)
+	} else {
+		for i := 0; i < length; i++ {
+			f.iterateArrayIndex(i, state, value, isString)
+		}
 	}
+}
+
+func (f *For) iterateArrayIndex(i int, state *LoopState, value reflect.Value, isString bool) {
+	f.loopIteration(state, i)
+	offsetI := i + state.offset
+	item := value.Index(offsetI).Interface()
+	if isString {
+		item = string(item.(uint8))
+	}
+	state.data[f.name] = item
+	f.Common.Render(state.writer, state.data)
 }
 
 func (f *For) iterateMap(state *LoopState, value reflect.Value) {
 	keys := value.MapKeys()
-	length, data, writer := state.Length, state.data, state.writer
-	for i := 0; i < length; i++ {
-		f.loopIteration(state, i)
-		offsetI := i + state.offset
-		key := keys[offsetI]
-		data[f.keyName] = key.Interface()
-		data[f.valueName] = value.MapIndex(key).Interface()
-		f.Common.Render(writer, data)
+	length := state.Length
+	if f.reverse {
+		for i := length - 1; i >= 0; i-- {
+			f.iterateMapIndex(i, state, keys, value)
+		}
+	} else {
+		for i := 0; i < length; i++ {
+			f.iterateMapIndex(i, state, keys, value)
+		}
 	}
+}
+
+func (f *For) iterateMapIndex(i int, state *LoopState, keys []reflect.Value, value reflect.Value) {
+	f.loopIteration(state, i)
+	offsetI := i + state.offset
+	key := keys[offsetI]
+	state.data[f.keyName] = key.Interface()
+	state.data[f.valueName] = value.MapIndex(key).Interface()
+	f.Common.Render(state.writer, state.data)
 }
 
 func (f *For) loopIteration(state *LoopState, i int) {
 	l1 := state.Length - 1
-	state.Index = i + 1
-	state.Index0 = i
-	state.RIndex = state.Length - i
-	state.RIndex0 = l1 - i
-	state.First = i == 0
-	state.Last = i == l1
+	if f.reverse {
+		state.Index = state.Length - i
+		state.Index0 = l1 - i
+		state.RIndex = i + 1
+		state.RIndex0 = i
+		state.First = i == l1
+		state.Last = i == 0
+	} else {
+		state.Index = i + 1
+		state.Index0 = i
+		state.RIndex = state.Length - i
+		state.RIndex0 = l1 - i
+		state.First = i == l1
+		state.Last = i == l1
+	}
 }
 
 func (f *For) loopTeardown(state *LoopState) {
