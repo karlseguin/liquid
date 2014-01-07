@@ -65,6 +65,8 @@ func ToString(data interface{}) string {
 	switch typed := data.(type) {
 	case string:
 		return typed
+	case fmt.Stringer:
+		return typed.String()
 	default:
 		return string(ToBytes(data))
 	}

@@ -110,7 +110,7 @@ func extractTokens(parser *core.Parser, container core.Tag, config *core.Configu
 				return err
 			}
 			switch tag.Type() {
-			case core.ContainerTag:
+			case core.ContainerTag, core.LoopTag:
 				container.AddCode(tag)
 				stack = append(stack, container)
 				container = tag

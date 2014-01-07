@@ -15,6 +15,7 @@ type TagType int
 
 const (
 	ContainerTag TagType = iota
+	LoopTag
 	EndTag
 	SiblingTag
 	StandaloneTag

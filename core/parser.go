@@ -99,7 +99,7 @@ func (p *Parser) SkipSpaces() (current byte) {
 
 func (p *Parser) ReadValue() (Value, error) {
 	current := p.SkipSpaces()
-	if isTokenEnd(current) {
+	if IsTokenEnd(current) {
 		return nil, nil
 	}
 	if current == '\'' || current == '"' {
@@ -167,13 +167,13 @@ func (p *Parser) ReadStaticBoolValue() (Value, bool) {
 	start := p.Position
 	left := p.Left()
 	if left > 4 {
-		if p.Data[start] == 't' && p.Data[start+1] == 'r' && p.Data[start+2] == 'u' && p.Data[start+3] == 'e' && isTokenEnd(p.Data[start+4]) {
+		if p.Data[start] == 't' && p.Data[start+1] == 'r' && p.Data[start+2] == 'u' && p.Data[start+3] == 'e' && IsTokenEnd(p.Data[start+4]) {
 			p.ForwardBy(4)
 			return &StaticBoolValue{true}, true
 		}
 	}
 	if left > 5 {
-		if p.Data[start] == 'f' && p.Data[start+1] == 'a' && p.Data[start+2] == 'l' && p.Data[start+3] == 's' && p.Data[start+4] == 'e' && isTokenEnd(p.Data[start+5]) {
+		if p.Data[start] == 'f' && p.Data[start+1] == 'a' && p.Data[start+2] == 'l' && p.Data[start+3] == 's' && p.Data[start+4] == 'e' && IsTokenEnd(p.Data[start+5]) {
 			p.ForwardBy(5)
 			return &StaticBoolValue{false}, true
 		}
@@ -184,7 +184,7 @@ func (p *Parser) ReadStaticBoolValue() (Value, bool) {
 func (p *Parser) ReadStaticEmptyValue() (Value, bool) {
 	start := p.Position
 	if p.Left() > 5 {
-		if p.Data[start] == 'e' && p.Data[start+1] == 'm' && p.Data[start+2] == 'p' && p.Data[start+3] == 't' && p.Data[start+4] == 'y' && isTokenEnd(p.Data[start+5]) {
+		if p.Data[start] == 'e' && p.Data[start+1] == 'm' && p.Data[start+2] == 'p' && p.Data[start+3] == 't' && p.Data[start+4] == 'y' && IsTokenEnd(p.Data[start+5]) {
 			p.ForwardBy(5)
 			return &StaticEmptyValue{}, true
 		}
@@ -200,7 +200,7 @@ func (p *Parser) ReadDynamicValues() (Value, error) {
 		if current == '.' {
 			values = append(values, strings.ToLower(string(p.Data[marker:p.Position])))
 			marker = p.Position + 1
-		} else if isTokenEnd(current) {
+		} else if IsTokenEnd(current) {
 			values = append(values, strings.ToLower(string(p.Data[marker:p.Position])))
 			break
 		}
@@ -215,7 +215,7 @@ func (p *Parser) ReadName() string {
 	marker := p.Position
 	for ; p.Position < p.Len; p.Position++ {
 		current := p.Current()
-		if isTokenEnd(current) {
+		if IsTokenEnd(current) {
 			name = string(p.Data[marker:p.Position])
 			break
 		}
@@ -334,32 +334,32 @@ func (p *Parser) ReadComparisonOperator() ComparisonOperator {
 	if left > 1 {
 		current := p.Data[start]
 		next := p.Data[start+1]
-		if current == '=' && next == '=' && isTokenEnd(p.Data[start+2]) {
+		if current == '=' && next == '=' && IsTokenEnd(p.Data[start+2]) {
 			p.ForwardBy(2)
 			return Equals
 		}
-		if current == '!' && next == '=' && isTokenEnd(p.Data[start+2]) {
+		if current == '!' && next == '=' && IsTokenEnd(p.Data[start+2]) {
 			p.ForwardBy(2)
 			return NotEquals
 		}
-		if current == '>' && isTokenEnd(next) {
+		if current == '>' && IsTokenEnd(next) {
 			p.ForwardBy(1)
 			return GreaterThan
 		}
-		if current == '<' && isTokenEnd(next) {
+		if current == '<' && IsTokenEnd(next) {
 			p.ForwardBy(1)
 			return LessThan
 		}
-		if current == '>' && next == '=' && isTokenEnd(p.Data[start+2]) {
+		if current == '>' && next == '=' && IsTokenEnd(p.Data[start+2]) {
 			p.ForwardBy(2)
 			return GreaterThanOrEqual
 		}
-		if current == '<' && next == '=' && isTokenEnd(p.Data[start+2]) {
+		if current == '<' && next == '=' && IsTokenEnd(p.Data[start+2]) {
 			p.ForwardBy(1)
 			return LessThanOrEqual
 		}
 		if left > 7 {
-			if current == 'c' && next == 'o' && p.Data[start+2] == 'n' && p.Data[start+3] == 't' && p.Data[start+4] == 'a' && p.Data[start+5] == 'i' && p.Data[start+6] == 'n' && p.Data[start+7] == 's' && isTokenEnd(p.Data[start+8]) {
+			if current == 'c' && next == 'o' && p.Data[start+2] == 'n' && p.Data[start+3] == 't' && p.Data[start+4] == 'a' && p.Data[start+5] == 'i' && p.Data[start+6] == 'n' && p.Data[start+7] == 's' && IsTokenEnd(p.Data[start+8]) {
 				p.ForwardBy(8)
 				return Contains
 			}
@@ -374,11 +374,11 @@ func (p *Parser) ReadLogicalOperator() LogicalOperator {
 	if left > 2 {
 		current := p.Data[start]
 		next := p.Data[start+1]
-		if current == 'o' && next == 'r' && isTokenEnd(p.Data[start+2]) {
+		if current == 'o' && next == 'r' && IsTokenEnd(p.Data[start+2]) {
 			p.ForwardBy(2)
 			return OR
 		}
-		if current == 'a' && next == 'n' && p.Data[start+2] == 'd' && isTokenEnd(p.Data[start+3]) {
+		if current == 'a' && next == 'n' && p.Data[start+2] == 'd' && IsTokenEnd(p.Data[start+3]) {
 			p.ForwardBy(3)
 			return AND
 		}
@@ -500,7 +500,7 @@ func unescape(data []byte, escaped int) []byte {
 	return value
 }
 
-func isTokenEnd(b byte) bool {
+func IsTokenEnd(b byte) bool {
 	return b == ' ' || b == '|' || b == '}' || b == '%' || b == ':' || b == ',' || b == 0
 }
 

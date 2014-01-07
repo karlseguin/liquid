@@ -26,6 +26,8 @@ var Tags = map[string]TagFactory{
 	"when":       tags.WhenFactory,
 	"endcase":    tags.EndCaseFactory,
 	"include":    tags.IncludeFactory,
+	"for":        tags.ForFactory,
+	"endfor":     tags.EndForFactory,
 }
 
 func newTag(p *core.Parser, config *core.Configuration) (core.Tag, error) {

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"sync"
@@ -63,9 +64,16 @@ func ResolveFinal(value interface{}) interface{} {
 	}
 	kind := reflect.ValueOf(value).Kind()
 	if kind == reflect.Ptr || kind == reflect.Struct {
-		return ToBytes(value)
+		return resolvePtrOrStruct(value)
 	}
 	return value
+}
+
+func resolvePtrOrStruct(value interface{}) interface{} {
+	if s, ok := value.(fmt.Stringer); ok {
+		return s.String()
+	}
+	return ToBytes(value)
 }
 
 func resolveStruct(value reflect.Value, field string) interface{} {
