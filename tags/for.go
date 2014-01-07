@@ -28,14 +28,47 @@ func ForFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 		return nil, err
 	}
 
+	f := &For{
+		Common:    NewCommon(),
+		name:      name,
+		keyName:   name + "[0]",
+		valueName: name + "[1]",
+		value:     value,
+	}
+
+	for {
+		name := p.ReadName()
+		if name == "" {
+			break
+		}
+		if name == "limit" {
+			if p.SkipUntil(':') != ':' {
+				return nil, p.Error("Expecting ':' after limit in for tag", start)
+			}
+			p.Forward()
+			limit, err := p.ReadValue()
+			if err != nil {
+				return nil, err
+			}
+			f.limit = limit
+		} else if name == "offset" {
+			if p.SkipUntil(':') != ':' {
+				return nil, p.Error("Expecting ':' after offset in for tag", start)
+			}
+			p.Forward()
+			offset, err := p.ReadValue()
+			if err != nil {
+				return nil, err
+			}
+			f.offset = offset
+		} else if name == "reverse" {
+			f.reverse = true
+		} else {
+			return nil, p.Error(fmt.Sprint("%q is an inknown modifier in for tag", name), start)
+		}
+	}
 	p.SkipPastTag()
-	return &For{
-		NewCommon(),
-		name,
-		name + "[0]",
-		name + "[1]",
-		value,
-	}, nil
+	return f, nil
 }
 
 func EndForFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
@@ -47,6 +80,9 @@ type For struct {
 	name      string
 	keyName   string
 	valueName string
+	reverse   bool
+	limit     core.Value
+	offset    core.Value
 	value     core.Value
 }
 
@@ -55,16 +91,49 @@ func (f *For) AddSibling(tag core.Tag) error {
 }
 
 func (f *For) Render(writer io.Writer, data map[string]interface{}) {
-	resolved := f.value.Resolve(data)
-	if s, ok := resolved.(string); ok {
-		f.iterateString(writer, data, s)
-	} else {
-		value := reflect.ValueOf(resolved)
-		kind := value.Kind()
-		if kind == reflect.Array || kind == reflect.Slice {
-			f.iterateArray(writer, data, value)
-		} else if kind == reflect.Map {
-			f.iterateMap(writer, data, value)
+	value := reflect.ValueOf(f.value.Resolve(data))
+	kind := value.Kind()
+
+	if kind == reflect.Array || kind == reflect.Slice || kind == reflect.String || kind == reflect.Map {
+		length := value.Len()
+		if length == 0 {
+			return
+		}
+
+		state := &LoopState{
+			data:            data,
+			writer:          writer,
+			originalForLoop: data["forloop"],
+			Length:          length,
+		}
+		data["forloop"] = state
+		if f.limit != nil {
+			if limit, ok := core.ToInt(f.limit.Resolve(data)); ok && limit < length {
+				state.Length = limit
+			}
+		}
+
+		if f.offset != nil {
+			if offset, ok := core.ToInt(f.offset.Resolve(data)); ok {
+				state.offset = offset
+				if n := state.Length + state.offset; n < state.Length {
+					state.Length = n
+				} else if length < state.offset+state.Length {
+					state.Length = length - offset
+				}
+			}
+		}
+		println(state.offset, state.Length)
+
+		defer f.loopTeardown(state)
+		if kind == reflect.Map {
+			state.isMap = true
+			state.key = data[f.keyName]
+			state.value = data[f.valueName]
+			f.iterateMap(state, value)
+		} else {
+			state.value = data[f.name]
+			f.iterateArray(state, value, kind == reflect.String)
 		}
 	}
 }
@@ -77,84 +146,47 @@ func (f *For) Type() core.TagType {
 	return core.LoopTag
 }
 
-func (f *For) iterateString(writer io.Writer, data map[string]interface{}, s string) {
-	length := len(s)
-	if length == 0 {
-		return
-	}
-
-	state := f.loopSetup(length, data, false)
-	defer f.loopTeardown(state, data, false)
-
+func (f *For) iterateArray(state *LoopState, value reflect.Value, isString bool) {
+	length, data, writer := state.Length, state.data, state.writer
 	for i := 0; i < length; i++ {
-		f.loopIteration(state, i, length, data)
-		data[f.name] = string(s[i])
+		f.loopIteration(state, i)
+		offsetI := i + state.offset
+		item := value.Index(offsetI).Interface()
+		if isString {
+			item = string(item.(uint8))
+		}
+		data[f.name] = item
 		f.Common.Render(writer, data)
 	}
 }
 
-func (f *For) iterateArray(writer io.Writer, data map[string]interface{}, value reflect.Value) {
-	length := value.Len()
-	if length == 0 {
-		return
-	}
-
-	state := f.loopSetup(length, data, false)
-	defer f.loopTeardown(state, data, false)
-
-	for i := 0; i < length; i++ {
-		f.loopIteration(state, i, length, data)
-		data[f.name] = value.Index(i).Interface()
-		f.Common.Render(writer, data)
-	}
-}
-
-func (f *For) iterateMap(writer io.Writer, data map[string]interface{}, value reflect.Value) {
-	length := value.Len()
-	if length == 0 {
-		return
-	}
-
-	state := f.loopSetup(length, data, true)
-	defer f.loopTeardown(state, data, true)
-
+func (f *For) iterateMap(state *LoopState, value reflect.Value) {
 	keys := value.MapKeys()
+	length, data, writer := state.Length, state.data, state.writer
 	for i := 0; i < length; i++ {
-		f.loopIteration(state, i, length, data)
-		key := keys[i]
+		f.loopIteration(state, i)
+		offsetI := i + state.offset
+		key := keys[offsetI]
 		data[f.keyName] = key.Interface()
 		data[f.valueName] = value.MapIndex(key).Interface()
 		f.Common.Render(writer, data)
 	}
 }
 
-func (f *For) loopSetup(length int, data map[string]interface{}, isMap bool) *State {
-	state := &State{
-		originalForLoop: data["forloop"],
-		Length:          length,
-	}
-	data["forloop"] = state
-	if isMap {
-		state.key = data[f.keyName]
-		state.value = data[f.valueName]
-	} else {
-		state.value = data[f.name]
-	}
-	return state
-}
-
-func (f *For) loopIteration(state *State, i, length int, data map[string]interface{}) {
+func (f *For) loopIteration(state *LoopState, i int) {
+	l1 := state.Length - 1
 	state.Index = i + 1
 	state.Index0 = i
-	state.RIndex = length - i
-	state.RIndex0 = length - i - 1
+	state.RIndex = state.Length - i
+	state.RIndex0 = l1 - i
 	state.First = i == 0
-	state.Last = i == length-1
+	state.Last = i == l1
 }
 
-func (f *For) loopTeardown(state *State, data map[string]interface{}, isMap bool) {
+func (f *For) loopTeardown(state *LoopState) {
+	data := state.data
 	data["forloop"] = state.originalForLoop
-	if isMap {
+	if state.isMap {
 		data[f.keyName] = state.key
 		data[f.valueName] = state.value
 	} else {
@@ -162,10 +194,14 @@ func (f *For) loopTeardown(state *State, data map[string]interface{}, isMap bool
 	}
 }
 
-type State struct {
+type LoopState struct {
+	data            map[string]interface{}
+	writer          io.Writer
 	key             interface{}
 	value           interface{}
 	originalForLoop interface{}
+	offset          int
+	isMap           bool
 	Length          int
 	Index           int
 	Index0          int
