@@ -22,6 +22,8 @@ The following tags are missing:
 - break
 - continue
 
+**As per the original Liquid template, there's no automatic protection against XSS. This might change if I decide to turn this into something more than just a clone**
+
 ## Template Cache
 By default the templates are cached in a pretty dumb cache. That is, once in the cache, items stay in the cache (there's no expiry). The cache can be disabled, on a per-template basis, via:
 
