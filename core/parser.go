@@ -108,6 +108,9 @@ func (p *Parser) ReadValue() (Value, error) {
 	if current == '-' || (current >= '0' && current <= '9') {
 		return p.ReadStaticNumericValue()
 	}
+	if current == '(' {
+		return p.ReadRangeValue()
+	}
 	if b, ok := p.ReadStaticBoolValue(); ok {
 		return b, nil
 	}
@@ -148,19 +151,67 @@ func (p *Parser) ReadStaticStringValue(delimiter byte) (Value, error) {
 	return &StaticStringValue{data}, nil
 }
 
-func (p *Parser) ReadStaticNumericValue() (Value, error) {
+func (p *Parser) ReadRangeValue() (Value, error) {
 	start := p.Position
-	name := p.ReadName()
-	if len(name) == 0 {
+	p.Forward() //consume the opening (
+	from, err := p.ReadValue()
+	if err != nil {
+		return nil, err
+	}
+	if from == nil {
+		return nil, p.Error("Invalid range, should start with a number of variable", start)
+	}
+	if p.SkipUntil('.') != '.' || p.Left() < 2 || p.Data[p.Position+1] != '.' {
+		return nil, p.Error("Invalid range, expecting '..' between two values", start)
+	}
+	p.ForwardBy(2)
+	to, err := p.ReadValue()
+	if err != nil {
+		return nil, err
+	}
+	if to == nil {
+		return nil, p.Error("Invalid range, should end with a number of variable", start)
+	}
+
+	if p.SkipUntil(')') != ')' {
+		return nil, p.Error("Invalid range, expecting a close ')'", start)
+	}
+	p.Forward()
+	p.Commit()
+	return &RangeValue{from, to}, nil
+}
+
+func (p *Parser) ReadStaticNumericValue() (Value, error) {
+	hasDecimal := false
+	start := p.Position
+	var value string
+	p.SkipSpaces()
+	marker := p.Position
+	for ; p.Position < p.Len; p.Position++ {
+		current := p.Current()
+		if !IsTokenEnd(current) {
+			continue
+		}
+		if current == '.' {
+			next := p.Peek()
+			if next <= '9' && next >= '0' && !hasDecimal{
+				hasDecimal = true
+				continue
+			}
+		}
+		value = string(p.Data[marker:p.Position])
+		break
+	}
+	if len(value) == 0 {
 		return nil, p.Error("Was expecting a value, got nothing", start)
 	}
-	if i, err := strconv.Atoi(name); err == nil {
+	if i, err := strconv.Atoi(value); err == nil {
 		return &StaticIntValue{i}, nil
 	}
-	if f, err := strconv.ParseFloat(name, 64); err == nil {
+	if f, err := strconv.ParseFloat(value, 64); err == nil {
 		return &StaticFloatValue{f}, nil
 	}
-	return nil, p.Error("Invalid value. This is either an invalid number, variable name, or maybe you're missing a quote", start)
+	return nil, p.Error("Invalid value. It looked like a number but could not be convert", start)
 }
 
 func (p *Parser) ReadStaticBoolValue() (Value, bool) {
@@ -501,7 +552,7 @@ func unescape(data []byte, escaped int) []byte {
 }
 
 func IsTokenEnd(b byte) bool {
-	return b == ' ' || b == '|' || b == '}' || b == '%' || b == ':' || b == ',' || b == 0
+	return b == ' ' || b == '|' || b == '}' || b == '%' || b == ':' || b == ',' || b == ')' || b == '.' || b == 0
 }
 
 func detach(data []byte) []byte {
