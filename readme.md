@@ -1,13 +1,15 @@
 # Liquid Templates For Go
 
-    template, err := liquid.ParseString("hello {{ name | upcase }}", nil)
-    if err != nil { panic(err) }
-    data := map[string]interface{
-      "name": "leto",
-    }
-    writer := new(bytes.Buffer)
-    template.Render(writer, data)
-    return writer.String()
+```go
+template, err := liquid.ParseString("hello {{ name | upcase }}", nil)
+if err != nil { panic(err) }
+data := map[string]interface{
+  "name": "leto",
+}
+writer := new(bytes.Buffer)
+template.Render(writer, data)
+return writer.String()
+```
 
 Given a file path, liquid can also `ParseFile`. Give a `[]byte` it can also simply `Parse`.
 
@@ -25,9 +27,11 @@ The following tags are missing:
 ## Template Cache
 By default the templates are cached in a pretty dumb cache. That is, once in the cache, items stay in the cache (there's no expiry). The cache can be disabled, on a per-template basis, via:
 
-    template, _ := liquid.Parse(someByteTemplate, liquid.Configure().Cache(nil))
-    //OR
-    template, _ := liquid.ParseString(someStringTemplate, liquid.NoCache)
+```go
+template, _ := liquid.Parse(someByteTemplate, liquid.Configure().Cache(nil))
+//OR
+template, _ := liquid.ParseString(someStringTemplate, liquid.NoCache)
+```
 
 Alternatively, you can provide your own `core.Cache` implementation which
 could implement expiry and other custom features.
@@ -42,25 +46,29 @@ As seen above, a configuration can be provided when generating a template. Confi
 ## Data Binding
 The template's `Render` method takes a `map[string]interface{}` as its argument. Beyond that, `Render` works on all built-in types, and will also reflect the exported fields of a struct.
 
-    type User struct {
-      Name  string
-      Manager *User
-    }
+```go
+type User struct {
+  Name  string
+  Manager *User
+}
 
-    t, _ := liquid.ParseString("{{ user.manager.name }}", nil)
-    t.Render(os.Stdout, map[string]interface{}{
-      "user": &User{"Duncan", &User{"Leto", nil}},
-    })
+t, _ := liquid.ParseString("{{ user.manager.name }}", nil)
+t.Render(os.Stdout, map[string]interface{}{
+  "user": &User{"Duncan", &User{"Leto", nil}},
+})
+```
 
 Notice that the template fields aren't case sensitive. If you're exporting fields such as `FirstName` and `Firstname` then shame on you. Make sure to downcase map keys.
 
 Complex objects should implement the `fmt.Stringer` interface (which is Go's toString() equivalent):
 
-    func (u *User) String() string {
-      return u.Name
-    }
+```go
+func (u *User) String() string {
+  return u.Name
+}
 
-    t, _ := liquid.ParseString("{{ user.manager }}", nil)
+t, _ := liquid.ParseString("{{ user.manager }}", nil)
+```
 
 Failing this, `fmt.Sprintf("%v")` is used to generate a value. At this point, it's really more for debugging purposes.
 
@@ -70,27 +78,31 @@ You can add custom filters by calling `core.RegisterFilter`. **The filter lookup
 
 It's best to look at the existing filters for ideas on how to proceed. Briefly, there are two types of filters: those with parameters and those without. To support both from a single interface, each filter has a factory. For filters without parameters, the factory is simple:
 
-    func UpcaseFactory(parameters []string) core.Filter {
-      return Upcase
-    }
-    func Upcase(input interface{}, data map[string]interface{}) interface{} {
-      //todo
-    }
+```go
+func UpcaseFactory(parameters []string) core.Filter {
+  return Upcase
+}
+func Upcase(input interface{}, data map[string]interface{}) interface{} {
+  //todo
+}
+```
 
 For filters that expect parameters, a little more work is needed:
 
-    func JoinFactory(parameters []core.Value) core.Filter {
-      if len(parameters) == 0 {
-        return defaultJoin.Join
-      }
-      return (&JoinFilter{parameters[0]}).Join
-    }
-    type JoinFilter struct {
-      glue core.Value
-    }
-    func (f *JoinFilter) Join(input interface{}, data map[string]interface{}) interface{} {
+```go
+func JoinFactory(parameters []core.Value) core.Filter {
+  if len(parameters) == 0 {
+    return defaultJoin.Join
+  }
+  return (&JoinFilter{parameters[0]}).Join
+}
+type JoinFilter struct {
+  glue core.Value
+}
+func (f *JoinFilter) Join(input interface{}, data map[string]interface{}) interface{} {
 
-    }
+}
+```
 
 It's a good idea to provide default values for parameters!
 
@@ -105,21 +117,23 @@ The include tag is supported by configuring a custom `IncludeHandler`. The handl
 
 For example, an include handler which loads templates from the filsystem, might look like:
 
-    var config = liquid.Configure().IncludeHandler(includeHandler)
+```go
+var config = liquid.Configure().IncludeHandler(includeHandler)
 
-    func main {
-      template, err := liquid.ParseString(..., config)
-      //...
-    }
+func main {
+  template, err := liquid.ParseString(..., config)
+  //...
+}
 
-    // name is equal to the paramter passed to include
-    // data is the data available to the template
-    func includeHandler(name string, writer io.Writer, data map[string]interface{}) {
-      // not sure if this is good enough, but do be mindful of directory traversal attacks
-      fileName := path.Join("./templates", string.Replace(name, "..", ""))
-      template, _ := liquid.ParseFile(fileName, config)
-      template.Render(writer, data)
-    }
+// name is equal to the paramter passed to include
+// data is the data available to the template
+func includeHandler(name string, writer io.Writer, data map[string]interface{}) {
+  // not sure if this is good enough, but do be mindful of directory traversal attacks
+  fileName := path.Join("./templates", string.Replace(name, "..", ""))
+  template, _ := liquid.ParseFile(fileName, config)
+  template.Render(writer, data)
+}
+```
 
 Sadly, include doesn't currently support the more advanced variations, such as specifying a specific value for the include or automatically including in a loop. However, the flexibility provided hopefully suffices for now.
 
