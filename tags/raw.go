@@ -49,8 +49,9 @@ func (r *Raw) AddSibling(tag core.Tag) error {
 	panic("AddSibling should not have been called on a Raw")
 }
 
-func (r *Raw) Render(writer io.Writer, data map[string]interface{}) {
+func (r *Raw) Execute(writer io.Writer, data map[string]interface{}) core.ExecuteState {
 	writer.Write(r.value)
+	return core.Normal
 }
 
 func (r *Raw) Name() string {

@@ -73,9 +73,16 @@ func (t *Template) Render(writer io.Writer, data map[string]interface{}) {
 	if data == nil {
 		data = make(map[string]interface{})
 	}
+	t.Execute(writer, data)
+}
+
+func (t *Template) Execute(writer io.Writer, data map[string]interface{}) core.ExecuteState {
 	for _, code := range t.Code {
-		code.Render(writer, data)
+		if state := code.Execute(writer, data); state == core.Break {
+			return core.Normal
+		}
 	}
+	return core.Normal
 }
 
 func buildTemplate(data []byte, config *core.Configuration) (*Template, error) {
@@ -88,8 +95,7 @@ func buildTemplate(data []byte, config *core.Configuration) (*Template, error) {
 }
 
 func extractTokens(parser *core.Parser, container core.Tag, config *core.Configuration) error {
-	stack := make([]core.Tag, 0, 0)
-	parentContainer := container
+	stack := []core.Tag{container}
 	for parser.HasMore() {
 		pre, markupType := parser.ToMarkup()
 		if len(pre) > 0 {
@@ -111,20 +117,19 @@ func extractTokens(parser *core.Parser, container core.Tag, config *core.Configu
 			switch tag.Type() {
 			case core.ContainerTag, core.LoopTag:
 				container.AddCode(tag)
-				stack = append(stack, container)
 				container = tag
-				parentContainer = tag
+				stack = append(stack, container)
 			case core.EndTag:
-				if tag.Name() != parentContainer.Name() {
-					return parser.Error("unexpected end tag")
-				}
 				l := len(stack) - 1
 				container = stack[l]
-				parentContainer = nil
+				if tag.Name() != container.Name() {
+					return parser.Error(fmt.Sprintf("end tag \"end%s\" cannot terminate %q", tag.Name(), container.Name()))
+				}
 				stack = stack[0:l]
+				container = stack[l-1]
 				parser.SkipPastTag()
 			case core.SiblingTag:
-				if err := parentContainer.AddSibling(tag); err != nil {
+				if err := stack[len(stack)-1].AddSibling(tag); err != nil {
 					return err
 				}
 				container = tag

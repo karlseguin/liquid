@@ -6,5 +6,13 @@ import (
 
 // interface for something that can render itself
 type Code interface {
-	Render(writer io.Writer, data map[string]interface{})
+	Execute(writer io.Writer, data map[string]interface{}) ExecuteState
 }
+
+type ExecuteState int
+
+const (
+	Normal ExecuteState = iota
+	Break
+	Continue
+)

@@ -10,7 +10,7 @@ type Output struct {
 	Filters []core.Filter
 }
 
-func (o *Output) Render(writer io.Writer, data map[string]interface{}) {
+func (o *Output) Execute(writer io.Writer, data map[string]interface{}) core.ExecuteState {
 	value := o.Value.Resolve(data)
 	if o.Filters != nil {
 		for _, filter := range o.Filters {
@@ -18,6 +18,7 @@ func (o *Output) Render(writer io.Writer, data map[string]interface{}) {
 		}
 	}
 	writer.Write(core.ToBytes(value))
+	return core.Normal
 }
 
 func newOutput(p *core.Parser) (core.Code, error) {

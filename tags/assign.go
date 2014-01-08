@@ -41,7 +41,7 @@ func (a *Assign) AddSibling(tag core.Tag) error {
 	panic("AddSibling should not have been called on a Assign")
 }
 
-func (a *Assign) Render(writer io.Writer, data map[string]interface{}) {
+func (a *Assign) Execute(writer io.Writer, data map[string]interface{}) core.ExecuteState {
 	value := a.value.Resolve(data)
 	if a.filters != nil {
 		for _, filter := range a.filters {
@@ -49,6 +49,7 @@ func (a *Assign) Render(writer io.Writer, data map[string]interface{}) {
 		}
 	}
 	data[a.name] = value
+	return core.Normal
 }
 
 func (a *Assign) Name() string {

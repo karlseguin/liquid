@@ -28,6 +28,8 @@ var Tags = map[string]TagFactory{
 	"include":    tags.IncludeFactory,
 	"for":        tags.ForFactory,
 	"endfor":     tags.EndForFactory,
+	"break":      tags.BreakFactory,
+	"continue":   tags.ContinueFactory,
 }
 
 func newTag(p *core.Parser, config *core.Configuration) (core.Tag, error) {

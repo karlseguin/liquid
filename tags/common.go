@@ -19,8 +19,11 @@ func (c *Common) AddCode(code core.Code) {
 	c.Code = append(c.Code, code)
 }
 
-func (c *Common) Render(writer io.Writer, data map[string]interface{}) {
+func (c *Common) Execute(writer io.Writer, data map[string]interface{}) core.ExecuteState {
 	for _, code := range c.Code {
-		code.Render(writer, data)
+		if state := code.Execute(writer, data); state != core.Normal {
+			return state
+		}
 	}
+	return core.Normal
 }

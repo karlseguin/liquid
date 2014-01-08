@@ -13,7 +13,7 @@ func TestLiteralRendersItself(t *testing.T) {
 
 func assertRender(t *testing.T, code core.Code, d map[string]interface{}, expected string) {
 	writer := new(bytes.Buffer)
-	code.Render(writer, d)
+	code.Execute(writer, d)
 	if writer.String() != expected {
 		t.Errorf("Expecting %q, got %q", expected, writer.String())
 	}

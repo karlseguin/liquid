@@ -40,12 +40,14 @@ func (u *Unless) AddSibling(tag core.Tag) error {
 	return nil
 }
 
-func (u *Unless) Render(writer io.Writer, data map[string]interface{}) {
+func (u *Unless) Execute(writer io.Writer, data map[string]interface{}) core.ExecuteState {
 	if u.condition.IsTrue(data) {
-		u.Common.Render(writer, data)
-	} else if u.elseCondition != nil {
-		u.elseCondition.Render(writer, data)
+		return u.Common.Execute(writer, data)
 	}
+	if u.elseCondition != nil {
+		return u.elseCondition.Execute(writer, data)
+	}
+	return core.Normal
 }
 
 func (u *Unless) Name() string {

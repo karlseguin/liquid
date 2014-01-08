@@ -86,17 +86,17 @@ type For struct {
 }
 
 func (f *For) AddSibling(tag core.Tag) error {
-	return errors.New(fmt.Sprintf("%q does not belong inside of a for"))
+	return errors.New(fmt.Sprintf("%q does not belong inside of a for", tag.Name()))
 }
 
-func (f *For) Render(writer io.Writer, data map[string]interface{}) {
+func (f *For) Execute(writer io.Writer, data map[string]interface{}) core.ExecuteState {
 	value := reflect.ValueOf(f.value.Resolve(data))
 	kind := value.Kind()
 
 	if kind == reflect.Array || kind == reflect.Slice || kind == reflect.String || kind == reflect.Map {
 		length := value.Len()
 		if length == 0 {
-			return
+			return core.Normal
 		}
 
 		state := &LoopState{
@@ -134,6 +134,7 @@ func (f *For) Render(writer io.Writer, data map[string]interface{}) {
 			f.iterateArray(state, value, kind == reflect.String)
 		}
 	}
+	return core.Normal
 }
 
 func (f *For) Name() string {
@@ -148,16 +149,20 @@ func (f *For) iterateArray(state *LoopState, value reflect.Value, isString bool)
 	length := state.Length
 	if f.reverse {
 		for i := length - 1; i >= 0; i-- {
-			f.iterateArrayIndex(i, state, value, isString)
+			if state := f.iterateArrayIndex(i, state, value, isString); state == core.Break {
+				return
+			}
 		}
 	} else {
 		for i := 0; i < length; i++ {
-			f.iterateArrayIndex(i, state, value, isString)
+			if state := f.iterateArrayIndex(i, state, value, isString); state == core.Break {
+				return
+			}
 		}
 	}
 }
 
-func (f *For) iterateArrayIndex(i int, state *LoopState, value reflect.Value, isString bool) {
+func (f *For) iterateArrayIndex(i int, state *LoopState, value reflect.Value, isString bool) core.ExecuteState {
 	f.loopIteration(state, i)
 	offsetI := i + state.offset
 	item := value.Index(offsetI).Interface()
@@ -165,7 +170,7 @@ func (f *For) iterateArrayIndex(i int, state *LoopState, value reflect.Value, is
 		item = string(item.(uint8))
 	}
 	state.data[f.name] = item
-	f.Common.Render(state.writer, state.data)
+	return f.Common.Execute(state.writer, state.data)
 }
 
 func (f *For) iterateMap(state *LoopState, value reflect.Value) {
@@ -173,22 +178,26 @@ func (f *For) iterateMap(state *LoopState, value reflect.Value) {
 	length := state.Length
 	if f.reverse {
 		for i := length - 1; i >= 0; i-- {
-			f.iterateMapIndex(i, state, keys, value)
+			if state := f.iterateMapIndex(i, state, keys, value); state == core.Break {
+				return
+			}
 		}
 	} else {
 		for i := 0; i < length; i++ {
-			f.iterateMapIndex(i, state, keys, value)
+			if state := f.iterateMapIndex(i, state, keys, value); state == core.Break {
+				return
+			}
 		}
 	}
 }
 
-func (f *For) iterateMapIndex(i int, state *LoopState, keys []reflect.Value, value reflect.Value) {
+func (f *For) iterateMapIndex(i int, state *LoopState, keys []reflect.Value, value reflect.Value) core.ExecuteState {
 	f.loopIteration(state, i)
 	offsetI := i + state.offset
 	key := keys[offsetI]
 	state.data[f.keyName] = key.Interface()
 	state.data[f.valueName] = value.MapIndex(key).Interface()
-	f.Common.Render(state.writer, state.data)
+	return f.Common.Execute(state.writer, state.data)
 }
 
 func (f *For) loopIteration(state *LoopState, i int) {

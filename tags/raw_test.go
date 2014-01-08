@@ -24,12 +24,12 @@ func TestRawFactoryHandlesUnclosedRaw(t *testing.T) {
 	spec.Expect(parser.HasMore()).ToEqual(false)
 }
 
-func TestRawTagRenders(t *testing.T) {
+func TestRawTagExecutes(t *testing.T) {
 	spec := gspec.New(t)
 	parser := newParser(" %} this {{}} {%} is raw {%endraw%}Z")
 	tag, _ := RawFactory(parser, nil)
 
 	writer := new(bytes.Buffer)
-	tag.Render(writer, nil)
+	tag.Execute(writer, nil)
 	spec.Expect(writer.String()).ToEqual(" this {{}} {%} is raw ")
 }

@@ -18,7 +18,7 @@ func (e *End) AddSibling(tag core.Tag) error {
 	panic("AddSibling should not have been called on an end tag")
 }
 
-func (e *End) Render(writer io.Writer, data map[string]interface{}) {
+func (e *End) Execute(writer io.Writer, data map[string]interface{}) core.ExecuteState {
 	panic("Render should not have been called on an end tag")
 }
 

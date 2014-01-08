@@ -64,18 +64,17 @@ func (i *If) AddSibling(tag core.Tag) error {
 	return nil
 }
 
-func (i *If) Render(writer io.Writer, data map[string]interface{}) {
+func (i *If) Execute(writer io.Writer, data map[string]interface{}) core.ExecuteState {
 	for index, condition := range i.conditions {
 		if condition.Condition().IsTrue(data) {
 			if index == 0 {
-				i.Common.Render(writer, data)
-				return
+				return i.Common.Execute(writer, data)
 			} else {
-				condition.Render(writer, data)
-				return
+				return condition.Execute(writer, data)
 			}
 		}
 	}
+	return core.Normal
 }
 
 func (i *If) Name() string {

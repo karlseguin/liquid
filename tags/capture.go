@@ -33,11 +33,12 @@ func (c *Capture) AddSibling(tag core.Tag) error {
 	return errors.New(fmt.Sprintf("%q tag does not belong directly within a capture", tag.Name()))
 }
 
-func (c *Capture) Render(w io.Writer, data map[string]interface{}) {
+func (c *Capture) Execute(w io.Writer, data map[string]interface{}) core.ExecuteState {
 	writer := c.config.GetWriter()
 	defer writer.Close()
-	c.Common.Render(writer, data)
+	c.Common.Execute(writer, data)
 	data[c.name] = writer.Bytes()
+	return core.Normal
 }
 
 func (c *Capture) Name() string {

@@ -19,8 +19,6 @@ The following filters are missing:
 The following tags are missing:
 
 - cycle
-- break
-- continue
 
 **As per the original Liquid template, there's no automatic protection against XSS. This might change if I decide to turn this into something more than just a clone**
 

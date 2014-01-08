@@ -36,7 +36,7 @@ func assertStringAssign(t *testing.T, parser *core.Parser, variableName, value s
 	spec.Expect(err).ToBeNil()
 	spec.Expect(tag.Name()).ToEqual("assign")
 	m := make(map[string]interface{})
-	tag.Render(nil, m)
+	tag.Execute(nil, m)
 	spec.Expect(m[variableName].(string)).ToEqual(value)
 }
 
@@ -48,6 +48,6 @@ func assertIntAssign(t *testing.T, parser *core.Parser, variableName string, val
 	m := map[string]interface{}{
 		"price": 100,
 	}
-	tag.Render(nil, m)
+	tag.Execute(nil, m)
 	spec.Expect(m[variableName].(int)).ToEqual(value)
 }

@@ -14,6 +14,7 @@ func newLiteral(data []byte) core.Code {
 	return &Literal{Value: data}
 }
 
-func (l *Literal) Render(writer io.Writer, data map[string]interface{}) {
+func (l *Literal) Execute(writer io.Writer, data map[string]interface{}) core.ExecuteState {
 	writer.Write(l.Value)
+	return core.Normal
 }

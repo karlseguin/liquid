@@ -89,7 +89,7 @@ func indexedValue(container interface{}, index interface{}) interface{} {
 	kind := value.Kind()
 	if kind == reflect.Array || kind == reflect.Slice || kind == reflect.String {
 		if n, ok := ToInt(index); ok && n <= value.Len() && n > 0 {
-			return value.Index(n-1).Interface()
+			return value.Index(n - 1).Interface()
 		}
 	} else if kind == reflect.Map {
 		indexValue := reflect.ValueOf(index)

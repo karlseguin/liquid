@@ -56,13 +56,13 @@ func (c *Case) AddSibling(tag core.Tag) error {
 	return nil
 }
 
-func (c *Case) Render(writer io.Writer, data map[string]interface{}) {
+func (c *Case) Execute(writer io.Writer, data map[string]interface{}) core.ExecuteState {
 	for _, condition := range c.conditions {
 		if condition.Condition().IsTrue(data) {
-			condition.Render(writer, data)
-			return
+			return condition.Execute(writer, data)
 		}
 	}
+	return core.Normal
 }
 
 func (c *Case) Name() string {

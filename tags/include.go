@@ -31,10 +31,11 @@ func (i *Include) AddSibling(tag core.Tag) error {
 	panic("AddSibling should not have been called on a Include")
 }
 
-func (i *Include) Render(writer io.Writer, data map[string]interface{}) {
+func (i *Include) Execute(writer io.Writer, data map[string]interface{}) core.ExecuteState {
 	if i.handler != nil {
 		i.handler(core.ToString(i.value.Resolve(data)), writer, data)
 	}
+	return core.Normal
 }
 
 func (i *Include) Name() string {
