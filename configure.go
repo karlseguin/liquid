@@ -1,6 +1,7 @@
 package liquid
 
 import (
+	"github.com/karlseguin/bytepool"
 	"github.com/karlseguin/liquid/core"
 )
 
@@ -13,5 +14,10 @@ var (
 // Entry into the fluent-configuration
 func Configure() *core.Configuration {
 	c := new(core.Configuration)
-	return c.SetInternalBuffer(512, 4096).Cache(TemplateCache)
+	return c.Cache(TemplateCache)
+}
+
+// Set's the count and size of the internal bytepool
+func SetInternalBuffer(count, size int) {
+	core.BytePool = bytepool.New(count, size)
 }

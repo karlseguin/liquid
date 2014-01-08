@@ -20,12 +20,11 @@ func CaptureFactory(p *core.Parser, config *core.Configuration) (core.Tag, error
 		return nil, p.Error("Invalid assignment, variable not found. ")
 	}
 	p.SkipPastTag()
-	return &Capture{name, config, NewCommon()}, nil
+	return &Capture{name, NewCommon()}, nil
 }
 
 type Capture struct {
-	name   string
-	config *core.Configuration
+	name string
 	*Common
 }
 
@@ -34,7 +33,7 @@ func (c *Capture) AddSibling(tag core.Tag) error {
 }
 
 func (c *Capture) Execute(w io.Writer, data map[string]interface{}) core.ExecuteState {
-	writer := c.config.GetWriter()
+	writer := core.BytePool.Checkout()
 	defer writer.Close()
 	c.Common.Execute(writer, data)
 	data[c.name] = writer.Bytes()

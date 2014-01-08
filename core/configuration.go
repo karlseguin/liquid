@@ -5,6 +5,8 @@ import (
 	"io"
 )
 
+var BytePool = bytepool.New(128, 4096)
+
 // cache interface
 type Cache interface {
 	Get(key string) Code
@@ -21,7 +23,6 @@ type IncludeHandler func(name string, writer io.Writer, data map[string]interfac
 type Configuration struct {
 	cache              Cache
 	includeHandler     IncludeHandler
-	bytepool           *bytepool.Pool
 	preserveWhitespace bool
 }
 
@@ -45,21 +46,6 @@ func (c *Configuration) IncludeHandler(handler IncludeHandler) *Configuration {
 // Gets the configured include handler
 func (c *Configuration) GetIncludeHandler() IncludeHandler {
 	return c.includeHandler
-}
-
-// Occasionally, Liquid needs to create temporary buffers (supporting the
-// capture tag, for example). It uses a fixed-length byte pool. You can control
-// the number of buffers to keep in the pool as well as the maximum size of each
-// item. By default, 512 items are kept with a maximum of 4KB. If you expect
-// large captures, you should increase the size parameter
-func (c *Configuration) SetInternalBuffer(count, size int) *Configuration {
-	c.bytepool = bytepool.New(count, size)
-	return c
-}
-
-// Gets the writer provider
-func (c *Configuration) GetWriter() *bytepool.Item {
-	return c.bytepool.Checkout()
 }
 
 // Preserves whitespace
