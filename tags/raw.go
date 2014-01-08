@@ -13,7 +13,7 @@ func RawFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	start := p.Position
 	end := start
 	for {
-		_, markupType := p.ToMarkup()
+		_, markupType := p.ToMarkup(false)
 		if markupType == core.TagMarkup {
 			//tentative end is before the start of the endraw tag
 			end = p.Position

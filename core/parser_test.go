@@ -8,7 +8,7 @@ import (
 func TestParserToMarkupWhenTheresNoMarkup(t *testing.T) {
 	spec := gspec.New(t)
 	parser := newParser("hello world")
-	pre, mt := parser.ToMarkup()
+	pre, mt := parser.ToMarkup(false)
 	spec.Expect(mt).ToEqual(NoMarkup)
 	spec.Expect(string(pre)).ToEqual("hello world")
 	spec.Expect(parser.HasMore()).ToEqual(false)
@@ -17,7 +17,7 @@ func TestParserToMarkupWhenTheresNoMarkup(t *testing.T) {
 func TestParserToMarkupWhenThereIsAnOutputMarkup(t *testing.T) {
 	spec := gspec.New(t)
 	parser := newParser("hello world {{ hello }}")
-	pre, mt := parser.ToMarkup()
+	pre, mt := parser.ToMarkup(false)
 	spec.Expect(mt).ToEqual(OutputMarkup)
 	spec.Expect(string(pre)).ToEqual("hello world ")
 	spec.Expect(parser.HasMore()).ToEqual(true)
@@ -27,7 +27,7 @@ func TestParserToMarkupWhenThereIsAnOutputMarkup(t *testing.T) {
 func TestParserToMarkupWhenThereIsATagMarkup(t *testing.T) {
 	spec := gspec.New(t)
 	parser := newParser("hello world {% hello %}")
-	pre, mt := parser.ToMarkup()
+	pre, mt := parser.ToMarkup(false)
 	spec.Expect(mt).ToEqual(TagMarkup)
 	spec.Expect(string(pre)).ToEqual("hello world ")
 	spec.Expect(parser.HasMore()).ToEqual(true)

@@ -106,6 +106,61 @@ func TestRendersCaseElse(t *testing.T) {
 	assertRender(t, template, nil, `A-else-Z`)
 }
 
+var complexTemplate = `
+Out of
+{% for color in colors reverse %}
+- {{ color}}
+{% endfor %}
+{% capture favorite %}{{ colors |first}}{%endcapture%}
+Your favorite color was {{favorite}}.
+---
+{% if ghola.incarnations > 10%}
+You've been raised many times
+{%else   %}
+Youngn'
+{%endif%}
+---
+{% for i in ( 1 ..ghola.name.size)%}
+{%case i%}
+{%when 2%}{%   continue%}
+{%when 4%}{%   break%}
+{%   endcase   %}
+{{ i | minus:1 }} is {{ ghola.name[i]}}
+{% endfor %}`
+
+func TestTemplateRender1(t *testing.T) {
+	d := map[string]interface{}{
+		"ghola":  PersonS{"Duncan", 5},
+		"colors": []string{"blue", "red", "white"},
+	}
+	template, _ := ParseString(complexTemplate, nil)
+	assertRender(t, template, d, "\nOut of\n\n- white \n- red \n- blue  \nYour favorite color was blue.\n---\n\nYoungn'\n\n---\n  0 is 68    2 is 110  ")
+}
+
+func BenchmarkParseTemplateWithoutCache(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		ParseString(complexTemplate, NoCache)
+	}
+}
+
+func BenchmarkParseTemplateWithCache(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		ParseString(complexTemplate, nil)
+	}
+}
+
+func BenchmarkRenderTemplate(b *testing.B) {
+	d := map[string]interface{}{
+		"ghola":  PersonS{"Duncan", 5},
+		"colors": []string{"blue", "red", "white"},
+	}
+	template, _ := ParseString(complexTemplate, nil)
+	writer := new(NilWriter)
+	for i := 0; i < b.N; i++ {
+		template.Render(writer, d)
+	}
+}
+
 func assertLiteral(t *testing.T, template *Template, index int, expected string) {
 	actual := string(template.Code[index].(*Literal).Value)
 	if actual != expected {
@@ -130,4 +185,10 @@ type PersonS struct {
 
 func (p PersonS) String() string {
 	return p.Name
+}
+
+type NilWriter struct{}
+
+func (w *NilWriter) Write(b []byte) (int, error) {
+	return 0, nil
 }

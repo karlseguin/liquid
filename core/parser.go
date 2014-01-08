@@ -9,6 +9,7 @@ import (
 
 var (
 	EmptyBytes = []byte{}
+	Whitespace = []byte(" ")
 )
 
 type MarkupType int
@@ -38,28 +39,36 @@ func NewParser(data []byte) *Parser {
 	return parser
 }
 
-func (p *Parser) ToMarkup() ([]byte, MarkupType) {
+func (p *Parser) ToMarkup(preserveWhitespace bool) ([]byte, MarkupType) {
+	isWhitespace := true
 	start := p.Position
 	markupType := NoMarkup
 	for ; p.Position < p.Len; p.Position++ {
-		if p.SkipUntil('{') != '{' {
-			break
+		current := p.Current()
+		if current == '{' {
+			next := p.Peek()
+			if next == '{' {
+				markupType = OutputMarkup
+				break
+			}
+			if next == '%' {
+				markupType = TagMarkup
+				break
+			}
 		}
-		next := p.Peek()
-		if next == '{' {
-			markupType = OutputMarkup
-			break
-		}
-		if next == '%' {
-			markupType = TagMarkup
-			break
+		if isWhitespace && current != ' ' && current != '\r' && current != '\n' {
+			isWhitespace = false
 		}
 	}
 	pre := EmptyBytes
 	if p.Position > start {
-		pre = p.Data[start:p.Position]
+		if isWhitespace && !preserveWhitespace {
+			pre = Whitespace
+		} else {
+			pre = detach(p.Data[start:p.Position])
+		}
 	}
-	return detach(pre), markupType
+	return pre, markupType
 }
 
 func (p *Parser) SkipPastTag() {

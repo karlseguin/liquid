@@ -96,8 +96,9 @@ func buildTemplate(data []byte, config *core.Configuration) (*Template, error) {
 
 func extractTokens(parser *core.Parser, container core.Tag, config *core.Configuration) error {
 	stack := []core.Tag{container}
+	preserveWhiteSpace := config.GetPreserveWhitespace()
 	for parser.HasMore() {
-		pre, markupType := parser.ToMarkup()
+		pre, markupType := parser.ToMarkup(preserveWhiteSpace)
 		if len(pre) > 0 {
 			container.AddCode(newLiteral(pre))
 		}

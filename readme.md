@@ -42,6 +42,7 @@ As seen above, a configuration can be provided when generating a template. Confi
 - `Cache(cache core.Cache)`: the caching implementation to use. This defaults to `liquid.SimpleCache`, which is thread-safe.
 - `IncludeHandler(handler core.IncludeHandler)`: the callback used for handling includes. By default, includes are ignored. See below for more information.
 - `SetInternalBuffer(count, size int)`: the number of internal buffers and the maximum size of each buffer to use. Defaults to 512 and 4KB. This is currently only used for the capture tag. If you need to capture more than 4KB, increase the 2nd value.
+- `PreserveWhitespace()`: By default, Liquid will slightly compact whitespace around tags. It doesn't do a perfect job, but it does reduce the whitespace noise. This method lets you skip this whitespace compaction
 
 ## Data Binding
 The template's `Render` method takes a `map[string]interface{}` as its argument. Beyond that, `Render` works on all built-in types, and will also reflect the exported fields of a struct.

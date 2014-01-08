@@ -19,9 +19,10 @@ type IncludeHandler func(name string, writer io.Writer, data map[string]interfac
 
 // Configuration used for generating a template
 type Configuration struct {
-	cache          Cache
-	includeHandler IncludeHandler
-	bytepool       *bytepool.Pool
+	cache              Cache
+	includeHandler     IncludeHandler
+	bytepool           *bytepool.Pool
+	preserveWhitespace bool
 }
 
 // Set the caching engine, or nil for no caching
@@ -59,4 +60,15 @@ func (c *Configuration) SetInternalBuffer(count, size int) *Configuration {
 // Gets the writer provider
 func (c *Configuration) GetWriter() *bytepool.Item {
 	return c.bytepool.Checkout()
+}
+
+// Preserves whitespace
+func (c *Configuration) PreserveWhitespace() *Configuration {
+	c.preserveWhitespace = true
+	return c
+}
+
+// Gets the preserves whitespace value
+func (c *Configuration) GetPreserveWhitespace() bool {
+	return c.preserveWhitespace
 }

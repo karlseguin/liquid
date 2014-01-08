@@ -12,7 +12,7 @@ var endComment = &End{"comment"}
 func CommentFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	openTags := 1
 	for {
-		_, markupType := p.ToMarkup()
+		_, markupType := p.ToMarkup(false)
 		if markupType == core.TagMarkup {
 			p.ForwardBy(2) // skip {%
 			if name := p.ReadName(); name == "comment" {
