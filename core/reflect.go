@@ -34,7 +34,11 @@ func Resolve(data interface{}, field string) interface{} {
 	v := reflect.ValueOf(data)
 	switch v.Kind() {
 	case reflect.Map:
-		return v.MapIndex(reflect.ValueOf(field)).Interface()
+		value := v.MapIndex(reflect.ValueOf(field))
+		if value.IsValid() {
+			return value.Interface()
+		}
+		return nil
 	case reflect.Struct:
 		return resolveStruct(v, field)
 	case reflect.Ptr:
