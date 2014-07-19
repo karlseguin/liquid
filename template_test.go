@@ -21,6 +21,14 @@ func TestRendersOutputTags(t *testing.T) {
 	assertRender(t, template, d, `hello Leto Atreides, you ranked brown as your favorite color`)
 }
 
+func TestRendersOutputTagsWithMap(t *testing.T) {
+	d := map[string]interface{}{
+		"ghola": map[string]interface{}{"incarnations": 67, "master": "LETO"},
+	}
+	template, _ := ParseString("duncan, next is {{ ghola.incarnations | plus: 1}}th. Your master is {{ ghola.master | upcase }}", nil)
+	assertRender(t, template, d, `duncan, next is 68th. Your master is LETO`)
+}
+
 func TestRendersOutputTagsWithStructPointers(t *testing.T) {
 	d := map[string]interface{}{
 		"ghola": &Person{"Duncan", 67, &Person{"Leto", 0, nil}},

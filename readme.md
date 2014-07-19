@@ -63,6 +63,17 @@ t.Render(os.Stdout, map[string]interface{}{
 })
 ```
 
+or can be a **map**,
+
+```go
+t, _ := liquid.ParseString("{{ user.manager.name }}", nil)
+t.Render(os.Stdout, map[string]interface{}{
+	"user": map[string]interface{}{
+		"manager": map[string]interface{}{"name": "Leto"} ,
+		},
+})
+```
+
 Notice that the template fields aren't case sensitive. If you're exporting fields such as `FirstName` and `Firstname` then shame on you. Make sure to downcase map keys.
 
 Complex objects should implement the `fmt.Stringer` interface (which is Go's toString() equivalent):
