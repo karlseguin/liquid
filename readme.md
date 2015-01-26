@@ -3,7 +3,7 @@
 ```go
 template, err := liquid.ParseString("hello {{ name | upcase }}", nil)
 if err != nil { panic(err) }
-data := map[string]interface{
+data := map[string]interface{}{
   "name": "leto",
 }
 writer := new(bytes.Buffer)
