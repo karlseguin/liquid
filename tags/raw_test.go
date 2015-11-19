@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TEstRawFactory(t *testing.T) {
+func TestRawFactory(t *testing.T) {
 	spec := gspec.New(t)
 	parser := newParser(" %} this {{}} {%} is raw {%endraw%}Z")
 	tag, err := RawFactory(parser, nil)

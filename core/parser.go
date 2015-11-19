@@ -294,6 +294,35 @@ func (p *Parser) ReadParameters() ([]Value, error) {
 	return TrimValues(values), nil
 }
 
+func (p *Parser) ReadCycleValues() (name string, values []Value, err error) {
+
+	for {
+		value, err := p.ReadValue()
+		if err != nil {
+			return name, values, err
+		}
+		if value == nil {
+			break
+		}
+		pre := p.SkipSpaces()
+
+		if pre == ':' {
+			name, _ = value.Resolve(nil).(string)
+		} else {
+			values = append(values, value)
+		}
+		p.Forward()
+		continue
+	}
+	values = TrimValues(values)
+
+	if err != nil {
+		return name, values, err
+	}
+
+	return name, values, nil
+}
+
 func (p *Parser) ReadFilters() ([]Filter, error) {
 	var filters []Filter
 	if p.SkipSpaces() != '|' {
@@ -304,7 +333,7 @@ func (p *Parser) ReadFilters() ([]Filter, error) {
 	for name := p.ReadName(); name != ""; name = p.ReadName() {
 		factory, exists := FilterLookup[name]
 		if exists == false {
-			return nil, p.Error(fmt.Sprintf("Unknown filter %q", name))
+			return nil, nil //p.Error(fmt.Sprintf("Unknown filter %q", name))
 		}
 		var parameters []Value
 		if p.SkipSpaces() == ':' {

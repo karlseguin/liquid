@@ -18,6 +18,7 @@ func init() {
 	core.RegisterFilter("size", filters.SizeFactory)
 	core.RegisterFilter("times", filters.TimesFactory)
 	core.RegisterFilter("divideby", filters.DivideByFactory)
+	core.RegisterFilter("divided_by", filters.DivideByFactory)
 	core.RegisterFilter("prepend", filters.PrependFactory)
 	core.RegisterFilter("append", filters.AppendFactory)
 	core.RegisterFilter("strip_newlines", filters.StripNewLinesFactory)
@@ -36,5 +37,6 @@ func init() {
 	core.RegisterFilter("sort", filters.SortFactory)
 	core.RegisterFilter("default", filters.DefaultFactory)
 	core.RegisterFilter("reverse", filters.ReverseFactory)
+	core.RegisterFilter("reversed", filters.ReverseFactory)
 	core.RegisterFilter("date", filters.DateFactory)
 }

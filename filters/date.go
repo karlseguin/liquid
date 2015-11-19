@@ -50,10 +50,14 @@ func timeFromString(s string) (time.Time, bool) {
 		return core.Now(), true
 	}
 	t, err := time.Parse("2006-01-02 15:04:05 -0700", s)
-	if err != nil {
-		return zeroTime, false
+	if err == nil {
+		return t, true
 	}
-	return t, true
+	t, err = time.Parse("2006-01-02T15:04:05-07:00", s)
+	if err == nil {
+		return t, true
+	}
+	return zeroTime, false
 }
 
 func formatTime(t time.Time, ruby string) string {
@@ -86,7 +90,7 @@ func convertTimeFormat(t time.Time, n byte) string {
 	case 'B':
 		return t.Month().String()
 	case 'c':
-		return t.Format("ANSIC")
+		return t.Format(time.ANSIC)
 	case 'd':
 		return fmt.Sprintf("%02d", t.Day())
 	case 'H':

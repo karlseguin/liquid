@@ -9,10 +9,30 @@ import (
 )
 
 var (
-	endFor = &End{"for"}
+	endTableRow = &End{"tablerow"}
 )
 
-func ForFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
+type TableRowLoopState struct {
+	data            map[string]interface{}
+	writer          io.Writer
+	key             interface{}
+	value           interface{}
+	originalForLoop interface{}
+	offset          int
+	isMap           bool
+	Columns         int
+	CurrentColumns  int
+	CurrentRows     int
+	Length          int
+	Index           int
+	Index0          int
+	RIndex          int
+	RIndex0         int
+	First           bool
+	Last            bool
+}
+
+func TableRowFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	name := p.ReadName()
 	if len(name) == 0 {
 		return nil, p.Error("Invalid variable name in for tag")
@@ -27,7 +47,7 @@ func ForFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 		return nil, err
 	}
 
-	f := &For{
+	f := &TableRow{
 		Common:    NewCommon(),
 		name:      name,
 		keyName:   name + "[0]",
@@ -60,8 +80,16 @@ func ForFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 				return nil, err
 			}
 			f.offset = offset
-		} else if name == "reverse" || name == "reversed" {
-			f.reverse = true
+		} else if name == "cols" {
+			if p.SkipUntil(':') != ':' {
+				return nil, p.Error("Expecting ':' after cols in for tag")
+			}
+			p.Forward()
+			cols, err := p.ReadValue()
+			if err != nil {
+				return nil, err
+			}
+			f.cols = cols
 		} else {
 			return nil, p.Error(fmt.Sprint("%q is an inknown modifier in for tag", name))
 		}
@@ -70,26 +98,26 @@ func ForFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 	return f, nil
 }
 
-func EndForFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
-	return endFor, nil
+func EndTableRowFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
+	return endTableRow, nil
 }
 
-type For struct {
+type TableRow struct {
 	*Common
 	name      string
 	keyName   string
 	valueName string
-	reverse   bool
+	cols      core.Value
 	limit     core.Value
 	offset    core.Value
 	value     core.Value
 }
 
-func (f *For) AddSibling(tag core.Tag) error {
+func (f *TableRow) AddSibling(tag core.Tag) error {
 	return errors.New(fmt.Sprintf("%q does not belong inside of a for", tag.Name()))
 }
 
-func (f *For) Execute(writer io.Writer, data map[string]interface{}) core.ExecuteState {
+func (f *TableRow) Execute(writer io.Writer, data map[string]interface{}) core.ExecuteState {
 	value := reflect.ValueOf(f.value.Resolve(data))
 	kind := value.Kind()
 
@@ -99,7 +127,7 @@ func (f *For) Execute(writer io.Writer, data map[string]interface{}) core.Execut
 			return core.Normal
 		}
 
-		state := &LoopState{
+		state := &TableRowLoopState{
 			data:            data,
 			writer:          writer,
 			originalForLoop: data["forloop"],
@@ -122,6 +150,14 @@ func (f *For) Execute(writer io.Writer, data map[string]interface{}) core.Execut
 				}
 			}
 		}
+		if f.cols != nil {
+			if cols, ok := core.ToInt(f.cols.Resolve(data)); ok {
+				if cols < 1 {
+					cols = 0
+				}
+				state.Columns = cols
+			}
+		}
 
 		defer f.loopTeardown(state)
 		if kind == reflect.Map {
@@ -137,32 +173,25 @@ func (f *For) Execute(writer io.Writer, data map[string]interface{}) core.Execut
 	return core.Normal
 }
 
-func (f *For) Name() string {
-	return "for"
+func (f *TableRow) Name() string {
+	return "tablerow"
 }
 
-func (f *For) Type() core.TagType {
+func (f *TableRow) Type() core.TagType {
 	return core.LoopTag
 }
 
-func (f *For) iterateArray(state *LoopState, value reflect.Value, isString bool) {
+func (f *TableRow) iterateArray(state *TableRowLoopState, value reflect.Value, isString bool) {
+
 	length := state.Length
-	if f.reverse {
-		for i := length - 1; i >= 0; i-- {
-			if state := f.iterateArrayIndex(i, state, value, isString); state == core.Break {
-				return
-			}
-		}
-	} else {
-		for i := 0; i < length; i++ {
-			if state := f.iterateArrayIndex(i, state, value, isString); state == core.Break {
-				return
-			}
+	for i := 0; i < length; i++ {
+		if state := f.iterateArrayIndex(i, state, value, isString); state == core.Break {
+			return
 		}
 	}
 }
 
-func (f *For) iterateArrayIndex(i int, state *LoopState, value reflect.Value, isString bool) core.ExecuteState {
+func (f *TableRow) iterateArrayIndex(i int, state *TableRowLoopState, value reflect.Value, isString bool) core.ExecuteState {
 	f.loopIteration(state, i)
 	offsetI := i + state.offset
 	item := value.Index(offsetI).Interface()
@@ -170,57 +199,45 @@ func (f *For) iterateArrayIndex(i int, state *LoopState, value reflect.Value, is
 		item = string(item.(uint8))
 	}
 	state.data[f.name] = item
-	return f.Common.Execute(state.writer, state.data)
+
+	return f.writeItem(state)
 }
 
-func (f *For) iterateMap(state *LoopState, value reflect.Value) {
+func (f *TableRow) iterateMap(state *TableRowLoopState, value reflect.Value) {
+	f.writeRowStart(state)
+
 	keys := value.MapKeys()
 	length := state.Length
-	if f.reverse {
-		for i := length - 1; i >= 0; i-- {
-			if state := f.iterateMapIndex(i, state, keys, value); state == core.Break {
-				return
-			}
-		}
-	} else {
-		for i := 0; i < length; i++ {
-			if state := f.iterateMapIndex(i, state, keys, value); state == core.Break {
-				return
-			}
+	for i := 0; i < length; i++ {
+		if state := f.iterateMapIndex(i, state, keys, value); state == core.Break {
+			return
 		}
 	}
+	f.writeRowEnd(state)
 }
 
-func (f *For) iterateMapIndex(i int, state *LoopState, keys []reflect.Value, value reflect.Value) core.ExecuteState {
+func (f *TableRow) iterateMapIndex(i int, state *TableRowLoopState, keys []reflect.Value, value reflect.Value) core.ExecuteState {
 	f.loopIteration(state, i)
 	offsetI := i + state.offset
 	key := keys[offsetI]
 	state.data[f.keyName] = key.Interface()
 	state.data[f.valueName] = value.MapIndex(key).Interface()
-	return f.Common.Execute(state.writer, state.data)
+	return f.writeItem(state)
 }
 
-func (f *For) loopIteration(state *LoopState, i int) {
+func (f *TableRow) loopIteration(state *TableRowLoopState, i int) {
 	l1 := state.Length - 1
-	if f.reverse {
-		state.Index = state.Length - i
-		state.Index0 = l1 - i
-		state.RIndex = i + 1
-		state.RIndex0 = i
-		state.First = i == l1
-		state.Last = i == 0
-	} else {
-		state.Index = i + 1
-		state.Index0 = i
-		state.RIndex = state.Length - i
-		state.RIndex0 = l1 - i
-		state.First = i == l1
-		state.Last = i == l1
-	}
+	state.Index = i + 1
+	state.Index0 = i
+	state.RIndex = state.Length - i
+	state.RIndex0 = l1 - i
+	state.First = i == l1
+	state.Last = i == l1
 }
 
-func (f *For) loopTeardown(state *LoopState) {
+func (f *TableRow) loopTeardown(state *TableRowLoopState) {
 	data := state.data
+
 	data["forloop"] = state.originalForLoop
 	if state.isMap {
 		data[f.keyName] = state.key
@@ -230,19 +247,27 @@ func (f *For) loopTeardown(state *LoopState) {
 	}
 }
 
-type LoopState struct {
-	data            map[string]interface{}
-	writer          io.Writer
-	key             interface{}
-	value           interface{}
-	originalForLoop interface{}
-	offset          int
-	isMap           bool
-	Length          int
-	Index           int
-	Index0          int
-	RIndex          int
-	RIndex0         int
-	First           bool
-	Last            bool
+func (f *TableRow) writeRowStart(state *TableRowLoopState) {
+	state.CurrentRows = state.CurrentRows + 1
+	state.writer.Write([]byte(fmt.Sprintf("\n<tr class=\"row%v\">\n", state.CurrentRows)))
+}
+func (f *TableRow) writeRowEnd(state *TableRowLoopState) {
+	state.writer.Write([]byte("</tr>\n"))
+}
+func (f *TableRow) writeItem(state *TableRowLoopState) core.ExecuteState {
+
+	if state.Columns > 0 && state.CurrentColumns == 0 {
+		f.writeRowStart(state)
+	}
+	state.CurrentColumns = state.CurrentColumns + 1
+
+	state.writer.Write([]byte(fmt.Sprintf("<td class=\"col%v\">\n", state.CurrentColumns)))
+	res := f.Common.Execute(state.writer, state.data)
+	state.writer.Write([]byte(fmt.Sprintf("\n</td>\n")))
+
+	if state.Columns > 0 && state.CurrentColumns >= state.Columns {
+		state.CurrentColumns = 0
+		f.writeRowEnd(state)
+	}
+	return res
 }
