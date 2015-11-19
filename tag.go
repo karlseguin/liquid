@@ -34,6 +34,8 @@ var Tags = map[string]TagFactory{
 	"tablerow":    tags.TableRowFactory,
 	"endtablerow": tags.EndTableRowFactory,
 	"cycle":       tags.CycleFactory,
+	"increment":   tags.IncrementFactory,
+	"decrement":   tags.DecrementFactory,
 }
 
 func newTag(p *core.Parser, config *core.Configuration) (core.Tag, error) {
