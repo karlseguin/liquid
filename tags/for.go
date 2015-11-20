@@ -60,7 +60,7 @@ func ForFactory(p *core.Parser, config *core.Configuration) (core.Tag, error) {
 				return nil, err
 			}
 			f.offset = offset
-		} else if name == "reverse" {
+		} else if name == "reverse" || name == "reversed" {
 			f.reverse = true
 		} else {
 			return nil, p.Error(fmt.Sprint("%q is an inknown modifier in for tag", name))
@@ -76,17 +76,23 @@ func EndForFactory(p *core.Parser, config *core.Configuration) (core.Tag, error)
 
 type For struct {
 	*Common
-	name      string
-	keyName   string
-	valueName string
-	reverse   bool
-	limit     core.Value
-	offset    core.Value
-	value     core.Value
+	name          string
+	keyName       string
+	valueName     string
+	reverse       bool
+	limit         core.Value
+	offset        core.Value
+	value         core.Value
+	elseCondition *Else
 }
 
 func (f *For) AddSibling(tag core.Tag) error {
-	return errors.New(fmt.Sprintf("%q does not belong inside of a for", tag.Name()))
+	e, ok := tag.(*Else)
+	if ok == false {
+		return errors.New(fmt.Sprintf("%q does not belong inside of a for", tag.Name()))
+	}
+	f.elseCondition = e
+	return nil
 }
 
 func (f *For) Execute(writer io.Writer, data map[string]interface{}) core.ExecuteState {
@@ -96,7 +102,7 @@ func (f *For) Execute(writer io.Writer, data map[string]interface{}) core.Execut
 	if kind == reflect.Array || kind == reflect.Slice || kind == reflect.String || kind == reflect.Map {
 		length := value.Len()
 		if length == 0 {
-			return core.Normal
+			return f.elseCondition.Execute(writer, data)
 		}
 
 		state := &LoopState{
